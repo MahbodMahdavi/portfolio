@@ -1,0 +1,106 @@
+{
+  "version": "2025-06",
+  "index_type": "Steel",
+  "base_year": 2010,
+  "normalization_base": "2010 = 100",
+  "series": [
+    {
+      "code": "IPG3311A2N",
+      "name": "Steel Industrial Production",
+      "weight": 0.25,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 0,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    },
+    {
+      "code": "WPU101703",
+      "name": "Steel Price Index (PPI)",
+      "weight": 0.25,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 0,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    },
+    {
+      "code": "GS10_minus_FEDFUNDS",
+      "name": "Interest Rate Spread",
+      "weight": 0.2,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 1,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    },
+    {
+      "code": "AWHAEMAN",
+      "name": "Average Weekly Hours - Manufacturing",
+      "weight": 0.15,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 0,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    },
+    {
+      "code": "PERMIT",
+      "name": "Building Permits",
+      "weight": 0.15,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 0,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    }
+  ],
+  "trend": 0.0,
+  "final_std_factor": null,
+  "final_std_ma_span": null,
+  "apply_trend": true,
+  "output": {
+    "index_output": "steel_index.csv",
+    "contributions_output": "steel_contributions.csv"
+  }
+}

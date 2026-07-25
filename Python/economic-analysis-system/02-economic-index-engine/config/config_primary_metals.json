@@ -1,0 +1,124 @@
+{
+  "version": "2025-06",
+  "index_type": "Primary Metals",
+  "base_year": 2010,
+  "normalization_base": "2010 = 100",
+  "series": [
+    {
+      "code": "AWHAEMAN",
+      "name": "Average Weekly Hours - Manufacturing",
+      "weight": 0.15,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 0,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    },
+    {
+      "code": "PERMIT",
+      "name": "Building Permits",
+      "weight": 0.15,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 0,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    },
+    {
+      "code": "GS10_minus_FEDFUNDS",
+      "name": "Interest Rate Spread (10Y - Fed Funds)",
+      "weight": 0.1,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 1,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    },
+    {
+      "code": "IPG3311A2N",
+      "name": "Industrial Production - Primary Metals",
+      "weight": 0.2,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 0,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    },
+    {
+      "code": "IPUEN331L200000000",
+      "name": "Hours Worked - Primary Metals",
+      "weight": 0.2,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 0,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    },
+    {
+      "code": "WPU101703",
+      "name": "Metal Price Index (PPI)",
+      "weight": 0.2,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 0,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    }
+  ],
+  "trend": 0.0,
+  "final_std_factor": null,
+  "final_std_ma_span": null,
+  "apply_trend": true,
+  "output": {
+    "index_output": "composite_index.csv",
+    "contributions_output": "component_contributions.csv"
+  }
+}
