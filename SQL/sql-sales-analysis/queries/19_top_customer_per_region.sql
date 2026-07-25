@@ -1,15 +1,20 @@
+USE SalesAnalysis;
+GO
+
 WITH CustomerSales AS (
     SELECT
         Region,
-        "Customer Name",
-        SUM(Sales) AS TotalSales
+        Customer_Name,
+        CAST(SUM(Sales) AS DECIMAL(10,2)) AS TotalSales
     FROM train
-    GROUP BY Region, "Customer Name"
+    GROUP BY
+        Region,
+        Customer_Name
 ),
 RankedCustomers AS (
     SELECT
         Region,
-        "Customer Name",
+        Customer_Name,
         TotalSales,
         ROW_NUMBER() OVER (
             PARTITION BY Region
@@ -19,7 +24,7 @@ RankedCustomers AS (
 )
 SELECT
     Region,
-    "Customer Name",
+    Customer_Name,
     TotalSales
 FROM RankedCustomers
 WHERE RowNum = 1
