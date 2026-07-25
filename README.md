@@ -1,6 +1,6 @@
 # Data Analytics Portfolio
 
-Welcome to my data analytics portfolio.
+This repository showcases projects in SQL, Power BI, Python, data analysis, and data modernization.
 
 This repository contains projects demonstrating my experience with:
 
