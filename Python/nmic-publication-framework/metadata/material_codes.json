@@ -1,0 +1,927 @@
+{
+  "G05_material_family_end_use": {
+    "BORON": [
+      {"matl_cd": "100",
+        "matl_nm": "Ferro boron",
+        "families": [
+          "Boron-treated carbon steel",
+          "HSLA steel",
+          "Alloy steel"
+        ],
+        "end_uses": [
+          "01A - Carbon Steel",
+          "01B - High-Strength Low-Alloy Steel",
+          "03A - Full Alloy Steel"
+        ]
+      },
+      {"matl_cd": "101",
+        "matl_nm": "Other boron additives (exclude aluminum hardeners)",
+        "families": [
+          "Boron-treated carbon steel",
+          "HSLA steel",
+          "Alloy steel"
+        ],
+        "end_uses": [
+          "01A - Carbon Steel",
+          "01B - High-Strength Low-Alloy Steel",
+          "03A - Full Alloy Steel",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      }
+    ],
+
+    "CHROMIUM": [
+      {"matl_cd": "111",
+        "matl_nm": "Low carbon (under 3% C)",
+        "families": [
+          "Stainless steel (general)",
+          "Alloy steel",
+          "Tool steel"
+        ],
+        "end_uses": [
+          "02 - Stainless and Heat-Resisting Steel",
+          "03A - Full Alloy Steel",
+          "04 - Tool Steel"
+        ]
+      },
+      {"matl_cd": "115",
+        "matl_nm": "High carbon 3% or more C; include exothermic grades and briquets",
+        "families": [
+          "Stainless steel (general)",
+          "Alloy steel",
+          "Tool steel"
+        ],
+        "end_uses": [
+          "02 - Stainless and Heat-Resisting Steel",
+          "03A - Full Alloy Steel",
+          "04 - Tool Steel"
+        ]
+      },
+      {"matl_cd": "116",
+        "matl_nm": "Chromium metal (over 98% Cr)",
+        "families": [
+          "Stainless steel (all families)",
+          "Alloy steel",
+          "Superalloys",
+          "Chemical/ceramic chromium uses"
+        ],
+        "end_uses": [
+          "02 - Stainless and Heat-Resisting Steel",
+          "03A - Full Alloy Steel",
+          "15 - Superalloys",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {"matl_cd": "118",
+        "matl_nm": "Ferrochromium silicon, chrome silicide (include exothermic grades)",
+        "families": [
+          "Stainless steel (general)",
+          "Alloy steel",
+          "Tool steel"
+        ],
+        "end_uses": [
+          "02 - Stainless and Heat-Resisting Steel",
+          "03A - Full Alloy Steel",
+          "04 - Tool Steel"
+        ]
+      },
+      {"matl_cd": "120",
+        "matl_nm": "Chromite ore or concentrate added directly to steel or used for furnace repair",
+        "families": [
+          "Stainless steel (general)",
+          "Alloy steel",
+          "Refractory uses"
+        ],
+        "end_uses": [
+          "02 - Stainless and Heat-Resisting Steel",
+          "03A - Full Alloy Steel",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {"matl_cd": "121",
+        "matl_nm": "Chromite ore used as foundry sand",
+        "families": [
+          "Cast iron",
+          "Steel foundry products",
+          "Refractory/foundry applications"
+        ],
+        "end_uses": [
+          "10 - Cast Irons",
+          "01A - Carbon Steel",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {"matl_cd": "122",
+        "matl_nm": "Other chromium alloys or materials (specify)",
+        "families": [
+          "Stainless steel",
+          "Alloy steel",
+          "Tool steel",
+          "Superalloys",
+          "Chemical/ceramic chromium uses"
+        ],
+        "end_uses": [
+          "02 - Stainless and Heat-Resisting Steel",
+          "03A - Full Alloy Steel",
+          "04 - Tool Steel",
+          "15 - Superalloys",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {"matl_cd": "123",
+        "matl_nm": "Chromium-aluminum alloy",
+        "families": [
+          "HSLA steel",
+          "Alloy steel",
+          "Stainless steel",
+          "Deoxidation and conditioning additions"
+        ],
+        "end_uses": [
+          "01B - High-Strength Low-Alloy Steel",
+          "03A - Full Alloy Steel",
+          "02 - Stainless and Heat-Resisting Steel"
+        ]
+      }
+    ],
+
+    "COBALT": [
+      {
+        "matl_cd": "131",
+        "matl_nm": "Metal (exclude metal powder)",
+        "families": [
+          "Superalloys",
+          "Cemented carbides (binder phase)",
+          "High-temperature alloys",
+          "Magnetic alloys"
+        ],
+        "end_uses": [
+          "15 - Superalloys",
+          "31 - Cemented Carbides and Related Products",
+          "21A/B/22/25/26/27/28/29 - Other Alloys"
+        ]
+      },
+      {
+        "matl_cd": "132",
+        "matl_nm": "Metal powder",
+        "families": [
+          "PM superalloys",
+          "PM tool steels",
+          "Magnetic materials",
+          "Cemented carbides (binder)"
+        ],
+        "end_uses": [
+          "15 - Superalloys",
+          "31 - Cemented Carbides and Related Products",
+          "30A/B/C - Mill Products Made From Metal Powder"
+        ]
+      },
+      {
+        "matl_cd": "133",
+        "matl_nm": "Oxide",
+        "families": [
+          "Chemical cobalt uses",
+          "Catalysts",
+          "Pigments"
+        ],
+        "end_uses": [
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {
+        "matl_cd": "134",
+        "matl_nm": "Purchased scrap",
+        "families": [
+          "Superalloys",
+          "Carbide tools",
+          "Other cobalt-containing alloys"
+        ],
+        "end_uses": [
+          "15 - Superalloys",
+          "31 - Cemented Carbides and Related Products",
+          "21A/B/22/25/26/27/28/29 - Other Alloys"
+        ]
+      },
+      {
+        "matl_cd": "135",
+        "matl_nm": "Other cobalt materials (specify)",
+        "families": [
+          "Superalloys",
+          "Cemented carbides",
+          "Magnetic alloys",
+          "Chemical cobalt products"
+        ],
+        "end_uses": [
+          "15 - Superalloys",
+          "31 - Cemented Carbides and Related Products",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      }
+    ],
+
+    "NIOBIUM_TANTALUM": [
+      {
+        "matl_cd": "140",
+        "matl_nm": "Standard grade",
+        "families": [
+          "HSLA steel",
+          "Alloy steel",
+          "Stainless steel",
+          "Superalloys"
+        ],
+        "end_uses": [
+          "01B - High-Strength Low-Alloy Steel",
+          "03A - Full Alloy Steel",
+          "02 - Stainless and Heat-Resisting Steel",
+          "15 - Superalloys"
+        ]
+      },
+      {
+        "matl_cd": "141",
+        "matl_nm": "Vacuum (high purity) grade",
+        "families": [
+          "Superalloys",
+          "High-purity stainless steels",
+          "Specialty alloys"
+        ],
+        "end_uses": [
+          "15 - Superalloys",
+          "02 - Stainless and Heat-Resisting Steel",
+          "21A/B/22/25/26/27/28/29 - Other Alloys"
+        ]
+      },
+      {
+        "matl_cd": "142",
+        "matl_nm": "Tantalum metal (include metal powder)",
+        "families": [
+          "Superalloys",
+          "Corrosion-resistant nonferrous alloys",
+          "Electronics and chemical equipment alloys"
+        ],
+        "end_uses": [
+          "15 - Superalloys",
+          "21A/B/22/25/26/27/28/29 - Other Alloys",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {
+        "matl_cd": "144",
+        "matl_nm": "Nickel niobium",
+        "families": [
+          "Superalloys",
+          "Stainless steel",
+          "HSLA steels (microalloying)"
+        ],
+        "end_uses": [
+          "15 - Superalloys",
+          "02 - Stainless and Heat-Resisting Steel",
+          "01B - High-Strength Low-Alloy Steel"
+        ]
+      },
+      {
+        "matl_cd": "145",
+        "matl_nm": "Niobium oxide",
+        "families": [
+          "Chemical/ceramic niobium uses",
+          "Capacitor materials",
+          "Specialty oxide applications"
+        ],
+        "end_uses": [
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {
+        "matl_cd": "149",
+        "matl_nm": "Other niobium and tantalum materials such as scrap (specify)",
+        "families": [
+          "HSLA steel",
+          "Superalloys",
+          "Stainless and alloy steels",
+          "Specialty nonferrous alloys"
+        ],
+        "end_uses": [
+          "01B - High-Strength Low-Alloy Steel",
+          "15 - Superalloys",
+          "03A - Full Alloy Steel",
+          "02 - Stainless and Heat-Resisting Steel"
+        ]
+      }
+    ],
+
+    "MANGANESE": [
+      {
+        "matl_cd": "150",
+        "matl_nm": "High carbon (over 2% C; include briquets and exothermic grades)",
+        "families": [
+          "Carbon steel",
+          "HSLA steel",
+          "Alloy steel",
+          "Austenitic manganese steel",
+          "Cast iron"
+        ],
+        "end_uses": [
+          "01A - Carbon Steel",
+          "01B - High-Strength Low-Alloy Steel",
+          "03A - Full Alloy Steel",
+          "10 - Cast Irons"
+        ]
+      },
+      {
+        "matl_cd": "151",
+        "matl_nm": "Medium carbon (0.75–2% C) and low carbon (less than 0.75% C); include nitrogen-bearing and nitrided grades and Massive Manganese; include Gimel products only if Mn < 96%",
+        "families": [
+          "Carbon steel",
+          "HSLA steel",
+          "Alloy steel",
+          "Stainless steel (austenitic support)"
+        ],
+        "end_uses": [
+          "01A - Carbon Steel",
+          "01B - High-Strength Low-Alloy Steel",
+          "03A - Full Alloy Steel",
+          "02 - Stainless and Heat-Resisting Steel"
+        ]
+      },
+      {
+        "matl_cd": "153",
+        "matl_nm": "Silicomanganese (include ferromanganese-silicon and briquets)",
+        "families": [
+          "Carbon steel",
+          "HSLA steel",
+          "Alloy steel",
+          "Deoxidation additions"
+        ],
+        "end_uses": [
+          "01A - Carbon Steel",
+          "01B - High-Strength Low-Alloy Steel",
+          "03A - Full Alloy Steel",
+          "10 - Cast Irons"
+        ]
+      },
+      {
+        "matl_cd": "154",
+        "matl_nm": "Manganese metal (include special grades; include Gimel products only if Mn ≥ 96%)",
+        "families": [
+          "Specialty steels",
+          "Nonferrous alloys",
+          "Battery and chemical manganese uses"
+        ],
+        "end_uses": [
+          "03A - Full Alloy Steel",
+          "21A/B/22/25/26/27/28/29 - Other Alloys",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {
+        "matl_cd": "156",
+        "matl_nm": "Manganese-aluminum briquets",
+        "families": [
+          "Deoxidation and alloy control in steels",
+          "Aluminum alloys",
+          "Specialty steels"
+        ],
+        "end_uses": [
+          "01A - Carbon Steel",
+          "01B - High-Strength Low-Alloy Steel",
+          "03A - Full Alloy Steel",
+          "21A/B/22/25/26/27/28/29 - Other Alloys"
+        ]
+      },
+      {
+        "matl_cd": "159",
+        "matl_nm": "Other manganese alloys and materials (specify)",
+        "families": [
+          "Carbon steel",
+          "HSLA steel",
+          "Alloy steel",
+          "Stainless steel"
+        ],
+        "end_uses": [
+          "01A - Carbon Steel",
+          "01B - High-Strength Low-Alloy Steel",
+          "03A - Full Alloy Steel",
+          "02 - Stainless and Heat-Resisting Steel"
+        ]
+      }
+    ],
+
+    "MOLYBDENUM": [
+      {
+        "matl_cd": "170",
+        "matl_nm": "Molybdic oxides (include briquets)",
+        "families": [
+          "Alloy steel (Cr-Mo steels)",
+          "Stainless steel (Mo-bearing)",
+          "Superalloys",
+          "Chemical molybdenum products"
+        ],
+        "end_uses": [
+          "03A - Full Alloy Steel",
+          "02 - Stainless and Heat-Resisting Steel",
+          "15 - Superalloys",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {
+        "matl_cd": "172",
+        "matl_nm": "Calcium molybdate",
+        "families": [
+          "Chemical molybdenum uses",
+          "Pigments/additives"
+        ],
+        "end_uses": [
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {
+        "matl_cd": "173",
+        "matl_nm": "Ferromolybdenum",
+        "families": [
+          "Cr-Mo alloy steels",
+          "Stainless steels (Mo-bearing)",
+          "Tool steels",
+          "Superalloys"
+        ],
+        "end_uses": [
+          "03A - Full Alloy Steel",
+          "02 - Stainless and Heat-Resisting Steel",
+          "04 - Tool Steel",
+          "15 - Superalloys"
+        ]
+      },
+      {
+        "matl_cd": "174",
+        "matl_nm": "Purified molybdenum disulfide",
+        "families": [
+          "Solid lubricants",
+          "Specialty coatings",
+          "Friction-reduction applications"
+        ],
+        "end_uses": [
+          "60 & 69 - Miscellaneous Uses",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {
+        "matl_cd": "175",
+        "matl_nm": "Molybdenite concentrate added directly to steel",
+        "families": [
+          "Cr-Mo alloy steels",
+          "Mo-bearing steels"
+        ],
+        "end_uses": [
+          "03A - Full Alloy Steel",
+          "01A - Carbon Steel",
+          "01B - High-Strength Low-Alloy Steel"
+        ]
+      },
+      {
+        "matl_cd": "176",
+        "matl_nm": "Molybdenum metal powder (include pellets)",
+        "families": [
+          "Tool steels",
+          "Superalloys",
+          "PM steels and alloys"
+        ],
+        "end_uses": [
+          "04 - Tool Steel",
+          "15 - Superalloys",
+          "30A/B/C - Mill Products Made From Metal Powder"
+        ]
+      },
+      {
+        "matl_cd": "178",
+        "matl_nm": "Ammonium molybdate",
+        "families": [
+          "Chemical molybdenum products",
+          "Catalysts",
+          "Pigments"
+        ],
+        "end_uses": [
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {
+        "matl_cd": "179",
+        "matl_nm": "Sodium molybdate",
+        "families": [
+          "Chemical molybdenum products",
+          "Corrosion inhibitors",
+          "Catalysts"
+        ],
+        "end_uses": [
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {
+        "matl_cd": "180",
+        "matl_nm": "Scrap material (specify)",
+        "families": [
+          "Alloy steels",
+          "Stainless steels",
+          "Superalloys"
+        ],
+        "end_uses": [
+          "03A - Full Alloy Steel",
+          "02 - Stainless and Heat-Resisting Steel",
+          "15 - Superalloys"
+        ]
+      },
+      {
+        "matl_cd": "181",
+        "matl_nm": "Other molybdenum materials (specify)",
+        "families": [
+          "Alloy steels",
+          "Stainless steels",
+          "Tool steels",
+          "Superalloys",
+          "Chemical molybdenum uses"
+        ],
+        "end_uses": [
+          "03A - Full Alloy Steel",
+          "02 - Stainless and Heat-Resisting Steel",
+          "04 - Tool Steel",
+          "15 - Superalloys",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      }
+    ],
+
+    "PHOSPHORUS": [
+      {
+        "matl_cd": "190",
+        "matl_nm": "Ferrophosphorus",
+        "families": [
+          "Carbon steel",
+          "Alloy steel",
+          "Cast iron"
+        ],
+        "end_uses": [
+          "01A - Carbon Steel",
+          "03A - Full Alloy Steel",
+          "10 - Cast Irons"
+        ]
+      },
+      {
+        "matl_cd": "191",
+        "matl_nm": "Other phosphorus additives (specify)",
+        "families": [
+          "Deoxidation and control additions",
+          "Specialty steels",
+          "Chemical phosphorus uses"
+        ],
+        "end_uses": [
+          "01A - Carbon Steel",
+          "03A - Full Alloy Steel",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      }
+    ],
+
+    "SILICON": [
+      {
+        "matl_cd": "200",
+        "matl_nm": "Silvery pig iron (less than 25% silicon)",
+        "families": [
+          "Cast irons",
+          "Carbon steels",
+          "Foundry iron"
+        ],
+        "end_uses": [
+          "10 - Cast Irons",
+          "01A - Carbon Steel"
+        ]
+      },
+      {
+        "matl_cd": "201",
+        "matl_nm": "Silicon carbide (metallurgical uses only)",
+        "families": [
+          "Steelmaking (deoxidation and recarburization)",
+          "Cast iron production",
+          "Refractory and abrasive uses"
+        ],
+        "end_uses": [
+          "01A - Carbon Steel",
+          "10 - Cast Irons",
+          "41-49 - Chemical and Ceramic Uses",
+          "31 - Cemented Carbides and Related Products"
+        ]
+      },
+      {
+        "matl_cd": "202",
+        "matl_nm": "25–55% Silicon (include briquets and exothermic grades)",
+        "families": [
+          "Carbon steel",
+          "Alloy steel",
+          "Cast iron",
+          "Electrical steels"
+        ],
+        "end_uses": [
+          "01A - Carbon Steel",
+          "03A - Full Alloy Steel",
+          "10 - Cast Irons",
+          "03C - Electrical Steel"
+        ]
+      },
+      {
+        "matl_cd": "206",
+        "matl_nm": "56–95% Silicon",
+        "families": [
+          "Deoxidation alloys",
+          "Electrical steels",
+          "Specialty silicon steels"
+        ],
+        "end_uses": [
+          "01A - Carbon Steel",
+          "03A - Full Alloy Steel",
+          "03C - Electrical Steel"
+        ]
+      },
+      {
+        "matl_cd": "207",
+        "matl_nm": "Silicon metal (over 95% silicon) (exclude semiconductor grades)",
+        "families": [
+          "Aluminum alloys",
+          "Electrical steels",
+          "Chemical silicon uses"
+        ],
+        "end_uses": [
+          "03C - Electrical Steel",
+          "21A/B/22/25/26/27/28/29 - Other Alloys",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {
+        "matl_cd": "210",
+        "matl_nm": "Other silicon alloys and materials (include magnesium ferrosilicon) (specify)",
+        "families": [
+          "Cast irons",
+          "Carbon steels",
+          "Alloy steels",
+          "Magnesium-treated irons"
+        ],
+        "end_uses": [
+          "10 - Cast Irons",
+          "01A - Carbon Steel",
+          "03A - Full Alloy Steel"
+        ]
+      }
+    ],
+
+    "TITANIUM": [
+      {
+        "matl_cd": "230",
+        "matl_nm": "Ferrotitanium",
+        "families": [
+          "HSLA steels",
+          "Alloy steels",
+          "Stainless steels (stabilized grades)",
+          "Deoxidation and grain refinement"
+        ],
+        "end_uses": [
+          "01B - High-Strength Low-Alloy Steel",
+          "03A - Full Alloy Steel",
+          "02 - Stainless and Heat-Resisting Steel"
+        ]
+      },
+      {
+        "matl_cd": "235",
+        "matl_nm": "Purchased titanium scrap",
+        "families": [
+          "Titanium alloys",
+          "Superalloys",
+          "Specialty corrosion-resistant alloys"
+        ],
+        "end_uses": [
+          "21A/B/22/25/26/27/28/29 - Other Alloys",
+          "15 - Superalloys"
+        ]
+      },
+      {
+        "matl_cd": "238",
+        "matl_nm": "Titanium sponge",
+        "families": [
+          "Titanium alloys",
+          "Aerospace alloys",
+          "High-performance structural alloys"
+        ],
+        "end_uses": [
+          "21A/B/22/25/26/27/28/29 - Other Alloys"
+        ]
+      },
+      {
+        "matl_cd": "239",
+        "matl_nm": "Other titanium additives (specify)",
+        "families": [
+          "HSLA steels",
+          "Alloy steels",
+          "Stainless steels",
+          "Titanium alloys"
+        ],
+        "end_uses": [
+          "01B - High-Strength Low-Alloy Steel",
+          "03A - Full Alloy Steel",
+          "02 - Stainless and Heat-Resisting Steel",
+          "21A/B/22/25/26/27/28/29 - Other Alloys"
+        ]
+      }
+    ],
+
+    "TUNGSTEN": [
+      {
+        "matl_cd": "240",
+        "matl_nm": "Ferrotungsten",
+        "families": [
+          "Tool steels",
+          "High-speed steels",
+          "Wear-resistant steels",
+          "Superalloys"
+        ],
+        "end_uses": [
+          "04 - Tool Steel",
+          "15 - Superalloys"
+        ]
+      },
+      {
+        "matl_cd": "242",
+        "matl_nm": "Tungsten metal powder",
+        "families": [
+          "Cemented carbides",
+          "PM tool steels",
+          "Superalloys",
+          "Heavy tungsten alloys"
+        ],
+        "end_uses": [
+          "31 - Cemented Carbides and Related Products",
+          "30A/B/C - Mill Products Made From Metal Powder",
+          "15 - Superalloys"
+        ]
+      },
+      {
+        "matl_cd": "245",
+        "matl_nm": "Tungsten carbide powder (include crystalline or crushed cast and that made from tungsten metal powder)",
+        "families": [
+          "Cemented carbides",
+          "Carbide cutting tools",
+          "Wear parts"
+        ],
+        "end_uses": [
+          "31 - Cemented Carbides and Related Products"
+        ]
+      },
+      {
+        "matl_cd": "246",
+        "matl_nm": "Ammonium tungstate",
+        "families": [
+          "Chemical tungsten products",
+          "Carbide precursor materials",
+          "Catalysts"
+        ],
+        "end_uses": [
+          "41-49 - Chemical and Ceramic Uses",
+          "31 - Cemented Carbides and Related Products"
+        ]
+      },
+      {
+        "matl_cd": "247",
+        "matl_nm": "Other tungsten chemicals (specify)",
+        "families": [
+          "Chemical tungsten products",
+          "Catalysts",
+          "Pigments"
+        ],
+        "end_uses": [
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {
+        "matl_cd": "248",
+        "matl_nm": "Scheelite (include synthetic) added directly to steel",
+        "families": [
+          "Tool steels",
+          "High-speed steels",
+          "Cemented carbides (via processing)"
+        ],
+        "end_uses": [
+          "04 - Tool Steel",
+          "31 - Cemented Carbides and Related Products"
+        ]
+      },
+      {
+        "matl_cd": "249",
+        "matl_nm": "Purchased scrap",
+        "families": [
+          "Cemented carbides",
+          "Tool steels",
+          "Superalloys"
+        ],
+        "end_uses": [
+          "31 - Cemented Carbides and Related Products",
+          "04 - Tool Steel",
+          "15 - Superalloys"
+        ]
+      },
+      {
+        "matl_cd": "250",
+        "matl_nm": "Other tungsten materials (specify)",
+        "families": [
+          "Cemented carbides",
+          "Tool steels",
+          "Superalloys",
+          "Chemical tungsten uses"
+        ],
+        "end_uses": [
+          "31 - Cemented Carbides and Related Products",
+          "04 - Tool Steel",
+          "15 - Superalloys",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      }
+    ],
+
+    "VANADIUM": [
+      {
+        "matl_cd": "260",
+        "matl_nm": "Ferrovanadium (include Carvan and Ferovan)",
+        "families": [
+          "HSLA steels",
+          "Alloy steels",
+          "Tool steels"
+        ],
+        "end_uses": [
+          "01B - High-Strength Low-Alloy Steel",
+          "03A - Full Alloy Steel",
+          "04 - Tool Steel"
+        ]
+      },
+      {
+        "matl_cd": "261",
+        "matl_nm": "Vanadium-aluminum and other master alloys",
+        "families": [
+          "Titanium alloys",
+          "Superalloys",
+          "Specialty steels"
+        ],
+        "end_uses": [
+          "21A/B/22/25/26/27/28/29 - Other Alloys",
+          "15 - Superalloys",
+          "03A - Full Alloy Steel"
+        ]
+      },
+      {
+        "matl_cd": "262",
+        "matl_nm": "Vanadium oxide (include fused, red cake, air dried oxides)",
+        "families": [
+          "Chemical vanadium uses",
+          "Catalysts",
+          "Steel/alloy production intermediates"
+        ],
+        "end_uses": [
+          "41-49 - Chemical and Ceramic Uses",
+          "03A - Full Alloy Steel"
+        ]
+      },
+      {
+        "matl_cd": "265",
+        "matl_nm": "Ammonium metavanadate",
+        "families": [
+          "Chemical vanadium products",
+          "Catalysts"
+        ],
+        "end_uses": [
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      },
+      {
+        "matl_cd": "266",
+        "matl_nm": "Vanadium metal",
+        "families": [
+          "Specialty steels",
+          "Superalloys",
+          "Energy/alloy applications"
+        ],
+        "end_uses": [
+          "03A - Full Alloy Steel",
+          "15 - Superalloys",
+          "21A/B/22/25/26/27/28/29 - Other Alloys"
+        ]
+      },
+      {
+        "matl_cd": "267",
+        "matl_nm": "Other vanadium materials (specify)",
+        "families": [
+          "HSLA steels",
+          "Tool steels",
+          "Superalloys",
+          "Chemical vanadium uses"
+        ],
+        "end_uses": [
+          "01B - High-Strength Low-Alloy Steel",
+          "03A - Full Alloy Steel",
+          "04 - Tool Steel",
+          "15 - Superalloys",
+          "41-49 - Chemical and Ceramic Uses"
+        ]
+      }
+    ]
+  }
+}

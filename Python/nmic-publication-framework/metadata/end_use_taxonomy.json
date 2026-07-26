@@ -1,0 +1,130 @@
+{
+  "G05_end_use_families": {
+    "01A - Carbon Steel": [
+      "Low-carbon steel",
+      "Medium-carbon steel",
+      "High-carbon steel",
+      "Boron-treated carbon steel",
+      "Microalloyed carbon steel (low levels of Nb, Ti, V)",
+      "Drawing/forming steels",
+      "Structural/plain carbon steels"
+    ],
+
+    "01B - High-Strength Low-Alloy Steel": [
+      "Nb-microalloy steels",
+      "V-microalloy steels",
+      "Ti-microalloy steels",
+      "Complex-microalloy steels (Nb+V, Ti+V)",
+      "Weathering steels (Cu-bearing)",
+      "Controlled-rolled HSLA",
+      "Thermo-mechanically processed HSLA"
+    ],
+
+    "02 - Stainless and Heat-Resisting Steel": [
+      "Austenitic stainless (304/316 families)",
+      "Ferritic stainless (430 family)",
+      "Martensitic stainless (410/420/440 families)",
+      "Duplex stainless (2205 family)",
+      "Super-austenitic stainless",
+      "Super-duplex stainless",
+      "Precipitation-hardening stainless (17-4PH, 15-5PH)",
+      "Heat-resisting chromium alloys"
+    ],
+
+    "03A - Full Alloy Steel": [
+      "Cr-Mo alloy steels (e.g., 4130/4140 family)",
+      "Ni-Cr alloy steels (e.g., 8620 family)",
+      "Ni-Cr-Mo alloy steels (4340 family)",
+      "Mn-Si low alloy steels",
+      "Boron-alloy steels (non-HSLA)",
+      "Quenched & tempered alloy steels",
+      "Case-hardening alloy steels"
+    ],
+
+    "03C - Electrical Steel": [
+      "Non-oriented electrical steel (NOES)",
+      "Grain-oriented electrical steel (GOES)",
+      "High-silicon electrical steels (Si > 3%)",
+      "Motor-lamination steels"
+    ],
+
+    "04 - Tool Steel": [
+      "High-speed steels (M-series, T-series)",
+      "Cold-work tool steels (D-series, O-series)",
+      "Hot-work tool steels (H-series)",
+      "Shock-resistant steels (S-series)",
+      "Mold steels (P-series)",
+      "High-carbon high-chromium steels"
+    ],
+
+    "05 - Unspecified Steel": [
+      "General carbon steels",
+      "Unclassified alloy steels",
+      "Mixed or unknown family",
+      "Steels where only partial chemistry is indicated"
+    ],
+
+    "10 - Cast Irons": [
+      "Gray cast iron",
+      "Ductile (nodular) iron",
+      "Compacted graphite iron (CGI)",
+      "White iron",
+      "Austempered ductile iron (ADI)",
+      "Malleable iron"
+    ],
+
+    "15 - Superalloys": [
+      "Nickel-based superalloys",
+      "Cobalt-based superalloys",
+      "Iron-nickel-based superalloys",
+      "Precipitation-hardened superalloys",
+      "Cast superalloys",
+      "Powder metallurgy superalloys"
+    ],
+
+    "21A/B/22/25/26/27/28/29 - Other Alloys": [
+      "Aluminum alloys",
+      "Copper alloys",
+      "Nickel alloys",
+      "Cobalt alloys",
+      "Tungsten alloys",
+      "Wear-resistant alloys",
+      "Hard-facing alloys",
+      "Magnetic alloys",
+      "Other specialty alloys"
+    ],
+
+    "30A/B/C - Mill Products from Metal Powder": [
+      "Powder-metallurgy steels",
+      "PM stainless steels",
+      "PM tool steels",
+      "PM magnetic materials",
+      "Specialty PM alloys"
+    ],
+
+    "31 - Cemented Carbides": [
+      "Tungsten carbide (WC)",
+      "WC-Co composite grades",
+      "Carbide tooling alloys",
+      "Cermets (TiC-based)",
+      "Thermal-spray carbide powders"
+    ],
+
+    "41-49 - Chemical and Ceramic Uses": [
+      "Pigment precursors",
+      "Catalyst precursor alloys",
+      "Frit/glass additives",
+      "Chemical-grade oxides",
+      "Silicides",
+      "Electroplating materials",
+      "Other inorganic functional alloys"
+    ],
+
+    "60 & 69 - Miscellaneous Uses": [
+      "Lubrication additives",
+      "Specialty powders",
+      "Experimental alloys",
+      "Materials not fitting a defined metallurgical family"
+    ]
+  }
+}
