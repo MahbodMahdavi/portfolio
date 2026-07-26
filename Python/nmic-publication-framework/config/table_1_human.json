@@ -1,0 +1,148 @@
+{
+  "year_inputs": {
+    "report_year": {
+      "description": "User-provided ending year for the table (displayed in J2). Prior years are computed from offsets.",
+      "type": "text",
+      "example": 2023
+    }
+  },
+  "tables": {
+    "Table 1": {
+      "font_name": "Aptos Display",
+      "font_size": 8,
+      "row_height": 11.25,
+
+      "Column Width": {"col A": 45, "col B": 7, "col C": 1, "col D": 7, "col E": 1, "col F": 7, "col G": 1, "col H": 7, "col I": 1, "col J": 7},
+
+      "Table header": {
+        "merge_range": "A1:J1",
+        "wrap_around": true,
+        "row_height": 33.75,
+        "vertical_alignment": "center",
+        "horizontal_alignment": "center",
+        "label": {
+          "line_1": {"label": "Table 1", "font_size": 9, "font_bold": true, "font_color": "#0F2F4F"},
+          "line_2": {"label": "Salient Chromium Statistics", "font_size": 8, "font_bold": true, "font_color": "#0F2F4F"},
+          "line_3": {"label": "(metric tons chromium content and thousand dollars, unless otherwise specified)", "font_size": 8, "font_bold": false, "font_color": "#0F2F4F"}}},
+
+      "Column headers": {
+        "row_height": 22.5,
+        "wrap_around": true,
+        "font_size": 9,
+        "font_bold": true,
+        "vertical_alignment": "bottom",
+        "horizontal_alignment": "center",
+
+        "static_headers": [{"cell_ref": "A2", "label": "Categories:", "horizontal_alignment": "left", "fill_color": "#0F2F4F", "font_color": "#FFFFFF"}],
+
+        "rolling_years": {
+          "base_year_variable": "report_year",
+          "cells": [{ "cell_ref": "B2", "offset": -4 }, { "cell_ref": "D2", "offset": -3 }, { "cell_ref": "F2", "offset": -2 }, { "cell_ref": "H2", "offset": -1 }, { "cell_ref": "J2", "offset": 0 }],
+          "style": {"horizontal_alignment": "right", "fill_color": "#0F2F4F", "font_color": "#FFFFFF"}},
+
+        "blank_header_cells": {"cells": ["C2", "E2", "G2", "I2"], "fill_color": "#0F2F4F"}},
+
+      "Row banding": {"banding_mode": "relative", "first_band": "white", "colors": {"white": "#FFFFFF", "gray": "#EFEFEF"}},
+
+      "Table borders": {"scope": "table", "style": "thin", "color": "#000000", "edges": ["top", "bottom", "left", "right", "inside_horizontal"], "inside_vertical": "none", "outline_style": "medium"},
+
+      "Border overrides": [
+        { "range": "A1:J1", "style": "medium", "edges": ["bottom"] },
+        { "range": "A2:J2", "style": "medium", "edges": ["bottom"] },
+        { "range": "A11:J11", "style": "medium", "edges": ["top"] },
+        { "range": "A17:J17", "style": "medium", "edges": ["top"] },
+        { "range": "A23:J23", "style": "medium", "edges": ["top"] },
+        { "range": "A27:J27", "style": "medium", "edges": ["top"] },
+        { "range": "A31:J31", "style": "medium", "edges": ["top"] },
+        { "range": "A34:J34", "style": "medium", "edges": ["top"] }
+      ],
+
+      "Metadata labels": {
+        "font_color": "#0F2F4F",
+        "A3:A51": [
+          { "label": "Components of U.S. Supply:", "cell_ref": "A3", "font_bold": true },
+          { "label": "Secondary supply, recycled scrap", "cell_ref": "A4", "indent": 1 },
+          { "label": "Imports: Chromite ore", "cell_ref": "A5", "indent": 1 },
+          { "label": "Imports: Chromium chemicals", "cell_ref": "A6", "indent": 1 },
+          { "label": "Imports: Chromium ferroalloys", "cell_ref": "A7", "indent": 1 },
+          { "label": "Imports: Chromium metal", "cell_ref": "A8", "indent": 1 },
+          { "label": "Stainless-steel mill products and scrap", "cell_ref": "A9", "indent": 1 },
+          { "label": "Industry beginning stocks", "cell_ref": "A10", "indent": 1 },
+          { "label": "Distribution of U.S. Supply:", "cell_ref": "A11", "font_bold": true },
+          { "label": "Exports: Chromite ore", "cell_ref": "A12", "indent": 1 },
+          { "label": "Exports: Chromium chemicals", "cell_ref": "A13", "indent": 1 },
+          { "label": "Exports: Chromium ferroalloys and metal", "cell_ref": "A14", "indent": 1 },
+          { "label": "Stainless-steel mill products and scrap", "cell_ref": "A15", "indent": 1 },
+          { "label": "Industry ending stocks", "cell_ref": "A16", "indent": 1 },
+          { "label": "Consumption:", "cell_ref": "A17", "font_bold": true },
+          { "label": "Apparent", "cell_ref": "A18", "indent": 1 },
+          { "label": "Reported: Ores and concentrates (gross weight)", "cell_ref": "A19", "indent": 1 },
+          { "label": "Reported: Ferroalloys (gross weight)", "cell_ref": "A20", "indent": 1 },
+          { "label": "Reported: Ferroalloys", "cell_ref": "A21", "indent": 1 },
+          { "label": "Reported: Metal (gross weight)", "cell_ref": "A22", "indent": 1 },
+          { "label": "Ending stocks:", "cell_ref": "A23", "font_bold": true },
+          { "label": "Ferroalloys", "cell_ref": "A24", "indent": 1 },
+          { "label": "Metal", "cell_ref": "A25", "indent": 1 },
+          { "label": "Other", "cell_ref": "A26", "indent": 1 },
+          { "label": "Unit Value:", "cell_ref": "A27", "font_bold": true },
+          { "label": "Chromite ore (gross weight and dollars per metric ton)", "cell_ref": "A28", "indent": 1 },
+          { "label": "Ferrochromium (dollars per pound)", "cell_ref": "A29", "indent": 1 },
+          { "label": "Aluminothermic chromium metal (gross weight and dollars per pound)", "cell_ref": "A30", "indent": 1 },
+          { "label": "Value:", "cell_ref": "A31", "font_bold": true },
+          { "label": "Imports", "cell_ref": "A32", "indent": 1 },
+          { "label": "Exports", "cell_ref": "A33", "indent": 1 },
+          { "label": "Stainless-steel:", "cell_ref": "A34", "font_bold": true },
+          { "label": "World production", "cell_ref": "A35", "indent": 1 },
+          { "label": "United States:", "cell_ref": "A36", "indent": 1 },
+          { "label": "Production (gross weight)", "cell_ref": "A37", "indent": 2 },
+          { "label": "Production", "cell_ref": "A38", "indent": 2 },
+          { "label": "Average grade, dimensions", "cell_ref": "A39", "indent": 2 },
+          { "label": "Shipments (gross weight)", "cell_ref": "A40", "indent": 2 },
+          { "label": "Imports (gross weight)", "cell_ref": "A41", "indent": 2 },
+          { "label": "Exports (gross weight)", "cell_ref": "A42", "indent": 2 },
+          { "label": "Scrap:", "cell_ref": "A43", "indent": 2 },
+          { "label": "Receipts (gross weight)", "cell_ref": "A44", "indent": 3 },
+          { "label": "Consumption (gross weight)", "cell_ref": "A45", "indent": 3 },
+          { "label": "Imports (gross weight)", "cell_ref": "A46", "indent": 3 },
+          { "label": "Exports (gross weight)", "cell_ref": "A47", "indent": 3 },
+          { "label": "Value: Imports", "cell_ref": "A48", "indent": 2 },
+          { "label": "Value: Imports (scrap)", "cell_ref": "A49", "indent": 2 },
+          { "label": "Value: Exports", "cell_ref": "A50", "indent": 2 },
+          { "label": "Value: Exports (scrap)", "cell_ref": "A51", "indent": 2 }]},
+
+      "Data columns": {
+        "vertical_alignment": "center",
+        "horizontal_alignment": "right",
+
+        "rules": [
+          {
+            "ranges": [
+              "B4:B28", "D4:D28", "F4:F28", "H4:H28", "J4:J28",
+              "B35:B51", "D35:D51", "F35:F51", "H35:H51", "J35:J51"
+            ],
+            "data_type": "number",
+            "decimal_places": 0,
+            "use_1000_separator": true
+          },
+          {"ranges": ["B29:B30", "D29:D30", "F29:F30", "H29:H30", "J29:J30"], "data_type": "number", "decimal_places": 2, "use_1000_separator": true},
+          {"ranges": ["B32:B33", "D32:D33", "F32:F33", "H32:H33", "J32:J33"], "data_type": "currency", "currency_symbol": "$", "decimal_places": 0, "use_1000_separator": true}],
+
+        "placeholders": {
+          "text_only_values": ["W", "NA", "XX"],
+
+          "less_than_threshold": {
+            "semantic_meaning": "less_than_half_unit",
+            "detect": {"match_type": "regex", "pattern": "^\\(\\d+\\)$"},
+            "human_display": "--",
+            "machine_output_policy": {"mode": "configurable", "allowed": ["zero", "blank"], "default": "zero"},
+            "machine_value_zero": 0,
+            "machine_value_blank": null},
+
+          "horizontal_alignment": "center",
+          "vertical_alignment": "center",
+          "suppress_numeric_formatting": true}},
+
+      "Citation columns": {"rules": [{"ranges": ["C4:C51", "E4:E51", "G4:G51", "I4:I51"], "data_type": "text", "horizontal_alignment": "left", "vertical_alignment": "center", "font_superscript": true}]}
+    }
+  }
+}
