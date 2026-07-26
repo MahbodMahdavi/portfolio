@@ -1,0 +1,88 @@
+{
+  "version": "2025-06",
+  "index_type": "Non-Metallic",
+  "base_year": 2010,
+  "normalization_base": "2010 = 100",
+  "series": [
+    {
+      "code": "IPG327S",
+      "name": "Industrial Production - Nonmetallic Mineral Products",
+      "weight": 0.25,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 0,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    },
+    {
+      "code": "WPUSI012011",
+      "name": "PPI - Construction Materials",
+      "weight": 0.25,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 0,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    },
+    {
+      "code": "IPUEN327L200000000",
+      "name": "Hours Worked - Nonmetallic Products",
+      "weight": 0.25,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 0,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    },
+    {
+      "code": "IPUEN327T301000000",
+      "name": "Real Output - Nonmetallic Manufacturing",
+      "weight": 0.25,
+      "ma_span": 3,
+      "ma_weights": [
+        1,
+        1,
+        1
+      ],
+      "change_method": 0,
+      "invert": false,
+      "std_method": 2,
+      "std_factor": null,
+      "std_ma_span": null,
+      "diff_span": 1,
+      "eos": "E"
+    }
+  ],
+  "trend": 0.0,
+  "final_std_factor": null,
+  "final_std_ma_span": null,
+  "apply_trend": false,
+  "output": {
+    "index_output": "non_metallic_index.csv",
+    "contributions_output": "non_metallic_contributions.csv"
+  }
+}
