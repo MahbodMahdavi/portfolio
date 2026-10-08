@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Table Renderer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+<style>
+  :root{
+    /* Color tokens (USGS / USWDS-style light theme) -- same tokens as trade_pipeline_v25_usgs.html.
+       Approximated from USWDS; swap to match the official USGS stylesheet exactly. */
+    --bg-from:#f0f0f0; --bg-to:#f0f0f0; --surface:#ffffff; --surface-border:#dfe1e2;
+    --surface-hover:#e7f2fa; --text:#1b1b1b; --text-muted:#565c65; --text-subtle:#71767a; --text-bright:#162e51;
+    --accent:#005ea2; --accent-hover:#1a4480; --accent-light:#005ea2; --accent-dark:#162e51;
+    --green:#2e6c3f; --green-hover:#1f4d2c; --focus:#2491ff;
+    --danger:#b50909; --ok:#2e6c3f; }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:"Public Sans","Source Sans Pro","Helvetica Neue",Helvetica,Roboto,Arial,sans-serif;background:var(--bg-from);min-height:100vh;padding:0 20px 32px;color:var(--text);line-height:1.5;}
+  .app{max-width:1150px;margin:0 auto;padding-top:28px;}
+  h1{color:var(--text-bright);font-size:1.6rem;margin-bottom:2px;font-weight:700;letter-spacing:-0.3px;padding-bottom:8px;border-bottom:4px solid var(--green);}
+  .sub{color:var(--text-muted);font-size:.9rem;margin:8px 0 20px;}
+  .panel{background:var(--surface);border:1px solid var(--surface-border);border-radius:4px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+  .drops{display:flex;gap:16px;flex-wrap:wrap;}
+  .drop{flex:1 1 300px;border:2px dashed #a9aeb1;border-radius:4px;padding:20px;text-align:center;cursor:pointer;transition:.12s;background:#fff;}
+  .drop:hover{border-color:var(--accent);background:var(--surface-hover);}
+  .drop.loaded{border-style:solid;border-color:var(--ok);background:#f4faf5;}
+  .drop .big{font-size:.95rem;font-weight:700;color:var(--text-bright);margin-bottom:4px;}
+  .drop .small{font-size:.76rem;color:var(--text-muted);}
+  .drop .status{font-size:.78rem;margin-top:8px;color:var(--ok);font-weight:700;}
+  .btn{border:2px solid transparent;padding:10px 20px;font-family:inherit;font-size:1rem;line-height:1.3;font-weight:700;border-radius:4px;cursor:pointer;color:#fff;background:var(--accent);}
+  .btn:hover{background:var(--accent-hover);}
+  .btn:focus-visible{outline:.25rem solid var(--focus);}
+  .btn:disabled,.btn.green:disabled{background:#e6e6e6;color:#1b1b1b;border-color:#a9aeb1;opacity:1;cursor:not-allowed;}
+  .btn.green{background:var(--green);} .btn.green:hover{background:var(--green-hover);}
+  .bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+  .msg{font-size:.82rem;color:var(--text-muted);}
+  .err{color:var(--danger);font-weight:600;}
+  .hint{font-size:.78rem;color:var(--text-muted);margin-top:6px;line-height:1.45;}
+  .preview{margin-top:8px;border:1px solid var(--surface-border);border-radius:4px;overflow:auto;background:#f0f0f0;padding:10px;}
+  table{border-collapse:collapse;font-family:"Times New Roman",serif;font-size:12px;color:#0f1a2c;background:#fff;}
+  .pv-wrap{background:#fff;padding:14px;border-radius:2px;display:inline-block;min-width:100%;}
+  td{padding:1px 6px;white-space:nowrap;height:16px;vertical-align:bottom;}
+  td.sp{width:7px;min-width:7px;padding:0;}
+  td.lab{text-align:left;} td.code{text-align:center;} td.data{text-align:right;}
+  td.ctr{text-align:center;} td.title{text-align:center;font-size:13px;} td.desc{text-align:center;}
+  .ind1{padding-left:18px;} .ind2{padding-left:34px;}
+  .hair-b{border-bottom:1px solid #c4c4c4;} .thin-b{border-bottom:2px solid #333;}
+  .hair-t{border-top:1px solid #c4c4c4;} .thin-t{border-top:2px solid #333;}
+  sup{font-size:8px;vertical-align:super;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="app">
+  <h1>📄 Table Renderer</h1>
+  <p class="sub">Config (per-sheet JSON) + pipeline CSV → styled publication .xlsx. Config codes match the CSV "HTS Code" column; years are read from the CSV.</p>
+
+  <div class="panel">
+    <div class="drops">
+      <label class="drop" id="dropCfg">
+        <div class="big">① Config JSON</div>
+        <div class="small">The per-sheet config (categories, codes, labels, line rules).</div>
+        <div class="status" id="cfgStatus"></div>
+        <input type="file" accept="application/json,.json" id="cfgInput" style="display:none">
+      </label>
+      <label class="drop" id="dropCsv">
+        <div class="big">② Pipeline CSV</div>
+        <div class="small">Export from the data pipeline (Year, Country Name, HTS Code, Quantity, Value).</div>
+        <div class="status" id="csvStatus"></div>
+        <input type="file" accept=".csv,text/csv" id="csvInput" style="display:none">
+      </label>
+    </div>
+    <div class="bar" style="margin-top:16px;">
+      <button class="btn" id="genBtn" disabled>Generate table</button>
+      <button class="btn green" id="dlBtn" disabled>⬇ Download .xlsx</button>
+      <span class="msg" id="msg"></span>
+    </div>
+    <p class="hint" id="hint"></p>
+  </div>
+
+  <div class="panel" id="previewPanel" style="display:none;">
+    <div class="msg" style="margin-bottom:8px;">Preview (styling approximated; the .xlsx is authoritative)</div>
+    <div class="preview"><div class="pv-wrap" id="preview"></div></div>
+  </div>
+</div>
+
+<script>
+/* ============================ state ============================ */
+let CONFIG = null, CSVROWS = null, BUILT = null;
+
+/* ============================ helpers ============================ */
+const $ = id => document.getElementById(id);
+function setStatus(el, ok, txt){ el.textContent = txt; }
+function ready(){ $("genBtn").disabled = !(CONFIG && CSVROWS); }
+
+function num(s){ if(s==null||s==="")return 0; s=String(s).trim(); if(s==="½")return 0.5; const n=Number(s.replace(/,/g,"")); return isNaN(n)?0:n; }
+function isHalf(s){ return String(s).trim()==="½"; }
+
+// dotted Schedule B display from raw digits, per config code_display.format (default ####.##.####)
+function formatCode(raw, fmt){
+  raw = String(raw).replace(/\D/g,"");
+  if(!fmt || !/#/.test(fmt)) return raw;
+  let out="", ri=0;
+  for(const ch of fmt){ if(ch==="#"){ out += raw[ri]!==undefined?raw[ri]:""; ri++; } else { if(ri<raw.length) out+=ch; } }
+  out += raw.slice(ri);
+  return out;
+}
+
+/* ============================ file loading ============================ */
+$("cfgInput").onchange = e => {
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ CONFIG=JSON.parse(r.result); $("dropCfg").classList.add("loaded"); setStatus($("cfgStatus"),true,"✓ "+f.name); }
+    catch(err){ CONFIG=null; $("dropCfg").classList.remove("loaded"); setStatus($("cfgStatus"),false,"✗ "+err.message); } ready(); };
+  r.readAsText(f);
+};
+$("csvInput").onchange = e => {
+  const f=e.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{ try{
+      const parsed=Papa.parse(r.result,{header:true,skipEmptyLines:true,dynamicTyping:false,delimitersToGuess:[",","\t","|",";"]});
+      CSVROWS=parsed.data.map(row=>{ const o={}; Object.keys(row).forEach(k=>o[k.trim()]=typeof row[k]==="string"?row[k].trim():row[k]); return o; });
+      $("dropCsv").classList.add("loaded"); setStatus($("csvStatus"),true,`✓ ${f.name} (${CSVROWS.length} rows)`);
+    } catch(err){ CSVROWS=null; $("dropCsv").classList.remove("loaded"); setStatus($("csvStatus"),false,"✗ "+err.message); } ready(); };
+  r.readAsText(f);
+};
+
+/* ============================ core build ============================ */
+function findCsvCol(rows, candidates){
+  const keys = Object.keys(rows[0]||{});
+  for(const c of candidates){ const hit=keys.find(k=>k.toLowerCase()===c.toLowerCase()); if(hit) return hit; }
+  // fuzzy contains
+  for(const c of candidates){ const hit=keys.find(k=>k.toLowerCase().includes(c.toLowerCase())); if(hit) return hit; }
+  return null;
+}
+
+function build(){
+  const cfg=CONFIG, rows=CSVROWS;
+  const idn = cfg.identity||{};
+  const tableNumber = idn.table_number!=null ? idn.table_number : (cfg.table_number||"");
+  const hs = cfg.header_section||{};
+  const cats = cfg.categories||[];
+  const yr = cfg.year_axis||{};
+  const perYear = yr.per_year_columns || [{key:"quantity",sub_label:"Quantity",unit_label:"(metric tons)"},{key:"value",sub_label:"Value",unit_label:"(thousands)"}];
+  const vh = cfg.value_handling||{value_scale:1,quantity_scale:1};
+  const ph = cfg.placeholders||{empty_or_zero:"--",less_than_half:"½"};
+  const cr = cfg.category_rules||{};
+  const thr = (cr.inclusion_threshold&&cr.inclusion_threshold.value)!=null ? cr.inclusion_threshold.value : 100;
+  const codeFmt = (cfg.code_display&&cfg.code_display.format) || "####.##.####";
+  const DASH = ph.empty_or_zero||"--";
+  const HALF = ph.less_than_half||"½";
+
+  // CSV columns
+  const cYear = findCsvCol(rows,["Year"]);
+  const cCountry = findCsvCol(rows,["Country Name","Country"]);
+  const cCode = findCsvCol(rows,["HTS Code","HTS","Schedule B","Code"]);
+  const cDesc = findCsvCol(rows,["Description"]);
+  const cQty = findCsvCol(rows,["Quantity (annual)","Metric Tons","Quantity"]);
+  const cVal = findCsvCol(rows,["Value (Year) ($000)","Value (Year)","Value"]);
+  if(!cYear||!cCountry||!cCode) throw new Error("CSV missing Year / Country / HTS Code columns.");
+
+  // detail rows only (drop subtotal + all-countries)
+  const detail = rows.filter(r=>{
+    const d=(cDesc?r[cDesc]:"")||"";
+    return !/ total$/i.test(d) && !/total for all countries/i.test(r[cCountry]||"") && !String(r[cCode]).includes("|");
+  });
+
+  // distinct years from CSV
+  const years=[...new Set(detail.map(r=>String(r[cYear])))].filter(Boolean).sort();
+  if(!years.length) throw new Error("No years found in CSV.");
+
+  // build per category
+  function buildCat(def){
+    const codeSet=new Set((def.codes||[]).map(c=>String(c).replace(/\D/g,"")));
+    const recs=detail.filter(r=>codeSet.has(String(r[cCode]).replace(/\D/g,"")));
+    const byC={};
+    recs.forEach(r=>{ const c=r[cCountry], y=String(r[cYear]); byC[c]=byC[c]||{}; byC[c][y]=byC[c][y]||{q:0,v:0,half:false};
+      const qr=cQty?r[cQty]:""; if(isHalf(qr)) byC[c][y].half=true; else byC[c][y].q+=num(qr);
+      byC[c][y].v+=num(cVal?r[cVal]:""); });
+    const shown=[],other=[];
+    Object.entries(byC).forEach(([c,yv])=>{ (years.some(y=>(yv[y]?.q||0)>thr)?shown:other).push(c); });
+    shown.sort((a,b)=>a.localeCompare(b));
+    const data={shown:{},other:{count:other.length,sums:{}},total:{}};
+    shown.forEach(c=>{ data.shown[c]={}; years.forEach(y=>{ const rec=byC[c][y]; data.shown[c][y]={q:(rec&&rec.half&&!rec.q)?"half":(rec?.q||0),v:rec?.v||0}; }); });
+    years.forEach(y=>{ let q=0,v=0; other.forEach(c=>{q+=byC[c][y]?.q||0;v+=byC[c][y]?.v||0;}); data.other.sums[y]={q,v}; });
+    years.forEach(y=>{ let q=0,v=0; Object.values(byC).forEach(yv=>{q+=yv[y]?.q||0;v+=yv[y]?.v||0;}); data.total[y]={q,v}; });
+    return { label:def.label, codes:(def.codes||[]).map(c=>formatCode(c,codeFmt)), data };
+  }
+  const built = cats.map(buildCat);
+
+  // display transforms
+  const qScale = vh.quantity_scale||1, vScale=vh.value_scale!=null?vh.value_scale:1;
+  const dispQty = q => q==="half" ? HALF : (!q||q===0)?DASH:Math.round(q*qScale);
+  const dispVal = v => (!v||v===0)?DASH:Math.round(v*vScale);
+
+  return { tableNumber, hs, years, perYear, built, dispQty, dispVal,
+    labelHeader:(cfg.label_column&&cfg.label_column.header)||"Product and country or locality",
+    codeHeader:(cfg.label_column&&cfg.label_column.code_header)||"Schedule B number",
+    otherTmpl:(cr.other_row&&cr.other_row.label_template)||"Other [{count} countries and (or) localities]",
+    totalLabel:(cr.total_row&&cr.total_row.label)||"Total",
+    footnotes: cfg.footnotes||{} };
+}
+
+/* ============================ layout (shared by preview + xlsx) ============================ */
+function layout(model){
+  const { tableNumber, hs, years, perYear, built, dispQty, dispVal, labelHeader, codeHeader, otherTmpl, totalLabel } = model;
+  // columns: A label, B sp, C code, D sp, then per year [Qty, sp, Value], between-year sp only
+  const COL={label:0,s1:1,code:2,s2:3};
+  const yearCols=[]; let c=4;
+  years.forEach((y,idx)=>{ yearCols.push({year:y,qtyCol:c,valCol:c+2}); c+=3; if(idx<years.length-1)c+=1; });
+  const lastCol=c-1, dataStart=4;
+
+  const aoa=[],merges=[],lines=[];
+  const setR=(r,o)=>{aoa[r]=aoa[r]||[];Object.entries(o).forEach(([ci,v])=>aoa[r][+ci]=v);};
+  const mrg=(r,a,b)=>merges.push({s:{r,c:a},e:{r,c:b}});
+  const line=(r,a,b,side,w)=>lines.push({row:r,c0:a,c1:b,side,w});
+
+  const title=(hs.title||"Table {table_number}").replace("{table_number}",tableNumber);
+  let desc=(hs.description||"");
+  // resolve {cite:ID} -> superscript number (from footnotes order)
+  desc=desc.replace(/\{cite:(\w+)\}/g,(m,id)=>{ const fn=(model.footnotes||{})[id]; return "\u00B9"; }); // simple: first cite -> 1
+  const unit=hs.unit_declaration||"";
+
+  setR(0,{0:title}); mrg(0,0,lastCol);
+  setR(1,{0:desc}); mrg(1,0,lastCol);
+  setR(2,{0:""});
+  if(unit){ setR(3,{0:unit}); mrg(3,0,lastCol); setR(4,{0:""}); } else { setR(3,{0:""}); setR(4,{0:""}); }
+  line(4,0,lastCol,'bottom','hair');
+
+  const yrRow={}; yearCols.forEach(g=>{yrRow[g.qtyCol]=g.year; mrg(5,g.qtyCol,g.valCol);}); setR(5,yrRow);
+  yearCols.forEach(g=>line(5,g.qtyCol,g.valCol,'bottom','hair'));
+  const r6={}; yearCols.forEach(g=>{r6[g.qtyCol]=perYear[0].sub_label||"Quantity"; r6[g.valCol]=perYear[1].sub_label||"Value";}); setR(6,r6);
+  const r7={[COL.label]:labelHeader,[COL.code]:codeHeader};
+  yearCols.forEach(g=>{r7[g.qtyCol]=perYear[0].unit_label||""; r7[g.valCol]=perYear[1].unit_label||"";}); setR(7,r7);
+  line(7,0,lastCol,'bottom','hair');
+
+  let row=8, finalTotalRow=null;
+  const putData=(r,rec)=>{ yearCols.forEach(g=>{aoa[r]=aoa[r]||[]; aoa[r][g.qtyCol]=dispQty(rec[g.year]?.q); aoa[r][g.valCol]=dispVal(rec[g.year]?.v);}); };
+
+  built.forEach((cat,ci)=>{
+    const isLast=ci===built.length-1;
+    setR(row,{[COL.label]:cat.label,[COL.code]:(cat.codes[0]||"")+(cat.codes.length>1?",":"")});
+    for(let k=1;k<cat.codes.length;k++){ const last=k===cat.codes.length-1; setR(row+k,{[COL.code]:cat.codes[k]+(last?"":",")}); }
+    row+=Math.max(1,cat.codes.length);
+
+    const d=cat.data, firstCountry=row, names=Object.keys(d.shown);
+    names.forEach(cn=>{ setR(row,{[COL.label]:"__I1__"+cn}); putData(row,d.shown[cn]); row++; });
+    const lastCountry=row-1;
+    let otherRow=null;
+    if(d.other.count>0){ otherRow=row; setR(row,{[COL.label]:"__I1__"+otherTmpl.replace("{count}",d.other.count)}); putData(row,d.other.sums); row++; }
+    const totalRow=row; setR(row,{[COL.label]:"__I2__"+totalLabel}); putData(row,d.total); row++;
+    if(isLast) finalTotalRow=totalRow;
+
+    // lines: col A above/below each country, other, total
+    if(names.length){ line(firstCountry,0,0,'top','hair'); for(let cr2=firstCountry;cr2<=lastCountry;cr2++) line(cr2,0,0,'bottom','hair'); }
+    if(otherRow!==null){ line(otherRow,0,0,'top','hair'); line(otherRow,0,0,'bottom','hair'); line(otherRow,dataStart,lastCol,'bottom','hair'); }
+    line(totalRow,0,0,'top','hair'); line(totalRow,0,0,'bottom','hair');
+    if(!isLast) line(totalRow,dataStart,lastCol,'bottom','thin');
+  });
+  // final category: uniform very-thin close A:K
+  if(finalTotalRow!==null){ for(let i=lines.length-1;i>=0;i--){ if(lines[i].row===finalTotalRow&&lines[i].side==='bottom') lines.splice(i,1);} line(finalTotalRow,0,lastCol,'bottom','hair'); }
+
+  return { aoa, merges, lines, yearCols, lastCol, COL, dataStart, bodyStart:8 };
+}
+
+/* ============================ preview render ============================ */
+function renderPreview(model){
+  const L=layout(model); const {aoa,merges,lines,yearCols,lastCol,COL,bodyStart}=L;
+  const mergeMap={},covered=new Set();
+  merges.forEach(m=>{mergeMap[`${m.s.r},${m.s.c}`]=(m.e.c-m.s.c+1); for(let r=m.s.r;r<=m.e.r;r++)for(let cc=m.s.c;cc<=m.e.c;cc++){if(!(r===m.s.r&&cc===m.s.c))covered.add(`${r},${cc}`);} });
+  const bmap={},tmap={}; const put=(mp,k,w)=>{if(mp[k]!=='thin')mp[k]=w;};
+  lines.forEach(ln=>{const mp=ln.side==='bottom'?bmap:tmap; for(let c=ln.c0;c<=ln.c1;c++)put(mp,`${ln.row},${c}`,ln.w);});
+  const total=lastCol+1; let html="<table>";
+  for(let r=0;r<aoa.length;r++){
+    html+="<tr>";
+    for(let c=0;c<total;c++){
+      if(covered.has(`${r},${c}`))continue;
+      const span=mergeMap[`${r},${c}`]||1;
+      let val=(aoa[r]&&aoa[r][c]!==undefined)?aoa[r][c]:"";
+      let ind="";
+      if(typeof val==='string'){ if(val.startsWith('__I1__')){ind='ind1';val=val.slice(6);} else if(val.startsWith('__I2__')){ind='ind2';val=val.slice(6);} }
+      const isSp=(c===COL.s1||c===COL.s2||yearCols.some((g,idx)=>c===g.qtyCol+1||(idx<yearCols.length-1&&c===g.valCol+1)));
+      let cls="";
+      if(r===0)cls="title"; else if(r===1)cls="desc"; else if(r===3)cls="desc";
+      else if(c===COL.label&&r>=bodyStart){ const t=String(val).trim(); cls=(t.endsWith(":")&&ind==="")?"lab":"lab "+ind; }
+      else if(c===COL.label)cls="lab ctr";
+      else if(c===COL.code)cls="code";
+      else if(isSp)cls="sp";
+      else if(yearCols.some(g=>c===g.qtyCol||c===g.valCol))cls=(r>=bodyStart)?"data":"data ctr";
+      let wb=null,wt=null;
+      for(let cc=c;cc<c+span;cc++){ const b=bmap[`${r},${cc}`]; if(b==='thin')wb='thin'; else if(b==='hair'&&wb!=='thin')wb='hair';
+        const t=tmap[`${r},${cc}`]; if(t==='thin')wt='thin'; else if(t==='hair'&&wt!=='thin')wt='hair'; }
+      if(wb==='thin')cls+=" thin-b"; else if(wb==='hair')cls+=" hair-b";
+      if(wt==='thin')cls+=" thin-t"; else if(wt==='hair')cls+=" hair-t";
+      let disp=val;
+      if(r===1&&typeof val==='string'&&val.endsWith('\u00B9'))disp=val.slice(0,-1)+'<sup>1</sup>';
+      else if(r>=bodyStart&&typeof val==='number'&&yearCols.some(g=>c===g.qtyCol||c===g.valCol))disp=val.toLocaleString('en-US');
+      html+=`<td class="${cls.trim()}" colspan="${span}">${disp===""?"&nbsp;":disp}</td>`;
+    }
+    html+="</tr>";
+  }
+  html+="</table>";
+  $("preview").innerHTML=html; $("previewPanel").style.display="block";
+}
+
+/* ============================ xlsx ============================ */
+async function makeXlsx(model){
+  const L=layout(model); const {aoa,merges,lines,yearCols,lastCol,COL}=L;
+  const wb=new ExcelJS.Workbook();
+  const sheetName=(model.hs&&model.hs.sheet_name)|| (CONFIG.identity&&CONFIG.identity.sheet_name) || ("T"+model.tableNumber);
+  const ws=wb.addWorksheet(sheetName,{views:[{showGridLines:false}]});
+  const FONT={name:"Times New Roman",size:8};
+  const WT={hair:{style:"hair",color:{argb:"FF000000"}},thin:{style:"thin",color:{argb:"FF000000"}}};
+  const totalCols=lastCol+1;
+  ws.getColumn(1).width=34; ws.getColumn(2).width=1; ws.getColumn(3).width=16; ws.getColumn(4).width=1;
+  yearCols.forEach((g,idx)=>{ws.getColumn(g.qtyCol+1).width=11; ws.getColumn(g.qtyCol+2).width=1; ws.getColumn(g.valCol+1).width=11; if(idx<yearCols.length-1)ws.getColumn(g.valCol+2).width=1;});
+  for(let r=0;r<aoa.length;r++){
+    const arr=aoa[r]||[];
+    for(let c=0;c<totalCols;c++){
+      let v=arr[c]; if(v===undefined||v==="")continue;
+      let indent=0;
+      if(typeof v==='string'){ if(v.startsWith('__I1__')){indent=1;v=v.slice(6);} else if(v.startsWith('__I2__')){indent=2;v=v.slice(6);} }
+      const cell=ws.getCell(r+1,c+1); cell.value=v; cell.font={...FONT};
+      if(typeof v==='number'){cell.numFmt='#,##0';cell.alignment={horizontal:'right'};}
+      if(indent)cell.alignment={horizontal:'left',indent};
+    }
+    ws.getRow(r+1).height=11.25;
+  }
+  merges.forEach(m=>ws.mergeCells(m.s.r+1,m.s.c+1,m.e.r+1,m.e.c+1));
+  [0,1,3].forEach(r=>{const cell=ws.getCell(r+1,1);cell.alignment={horizontal:'center'};cell.font={...FONT};});
+  yearCols.forEach(g=>{ws.getCell(6,g.qtyCol+1).alignment={horizontal:'center'};ws.getCell(7,g.qtyCol+1).alignment={horizontal:'center'};ws.getCell(7,g.valCol+1).alignment={horizontal:'center'};ws.getCell(8,g.qtyCol+1).alignment={horizontal:'center'};ws.getCell(8,g.valCol+1).alignment={horizontal:'center'};});
+  ws.getCell(8,1).alignment={horizontal:'center'}; ws.getCell(8,3).alignment={horizontal:'center'};
+  const dc=ws.getCell(2,1);
+  if(typeof dc.value==='string'&&dc.value.endsWith('\u00B9')){dc.value={richText:[{text:dc.value.slice(0,-1),font:{...FONT}},{text:"1",font:{...FONT,vertAlign:'superscript'}}]};dc.alignment={horizontal:'center'};}
+  lines.forEach(ln=>{for(let c=ln.c0;c<=ln.c1;c++){const cell=ws.getCell(ln.row+1,c+1);const b={...(cell.border||{})};b[ln.side]=WT[ln.w];cell.border=b;}});
+  const buf=await wb.xlsx.writeBuffer();
+  return {buf,sheetName};
+}
+
+/* ============================ wire buttons ============================ */
+$("genBtn").onclick=()=>{
+  try{
+    $("msg").textContent=""; $("msg").className="msg";
+    BUILT=build(); renderPreview(BUILT); $("dlBtn").disabled=false;
+    const yrs=BUILT.years.join(", ");
+    $("hint").textContent=`Rendered ${BUILT.built.length} categories across years ${yrs}. Review the preview, then download.`;
+  }catch(err){ $("msg").textContent="Error: "+err.message; $("msg").className="msg err"; $("dlBtn").disabled=true; }
+};
+$("dlBtn").onclick=async()=>{
+  if(!BUILT)return;
+  try{
+    const {buf,sheetName}=await makeXlsx(BUILT);
+    const blob=new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=sheetName+".xlsx"; a.click(); URL.revokeObjectURL(url);
+  }catch(err){ $("msg").textContent="Download error: "+err.message; $("msg").className="msg err"; }
+};
+
+/* click-through for the drop labels */
+$("dropCfg").onclick=e=>{ if(e.target.tagName!=="INPUT")$("cfgInput").click(); };
+$("dropCsv").onclick=e=>{ if(e.target.tagName!=="INPUT")$("csvInput").click(); };
+</script>
+</body>
+</html>
