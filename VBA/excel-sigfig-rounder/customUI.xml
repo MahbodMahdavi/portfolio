@@ -1,0 +1,14 @@
+<customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui">
+  <ribbon>
+    <tabs>
+      <tab id="sigFigsTab" label="Data Tools">
+        <group id="sigFigsGroup" label="Rounding">
+          <button id="roundBtn"
+                  size="large"
+                  image="round_icon"
+                  onAction="RoundToSigFigsModule.RoundToSigFigs" />
+        </group>
+      </tab>
+    </tabs>
+  </ribbon>
+</customUI>
