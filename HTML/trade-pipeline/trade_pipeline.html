@@ -1,0 +1,1075 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Census Trade Data Pipeline</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+  :root {
+    /* Color tokens (USGS / USWDS-style light theme).
+       Approximated from the USWDS system the USGS site is built on --
+       swap these values to match the official stylesheet exactly. */
+    --bg-from: #f0f0f0;
+    --bg-to: #f0f0f0;
+    --surface: #ffffff;
+    --surface-border: #dfe1e2;
+    --surface-hover: #e7f2fa;
+    --divider: #e6e6e6;
+    --text: #1b1b1b;
+    --text-muted: #565c65;
+    --text-subtle: #71767a;
+    --text-bright: #162e51;
+    --accent: #005ea2;
+    --accent-hover: #1a4480;
+    --accent-light: #005ea2;
+    --accent-dark: #162e51;
+    --green: #2e6c3f;
+    --green-hover: #1f4d2c;
+    --focus: #2491ff;
+    --success: #2e6c3f;
+    --warning: #936f38;
+    --info: #005ea2;
+    --violet: #54278f;
+    --danger: #b50909;
+    --danger-border: rgba(181,9,9,.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Public Sans", "Source Sans Pro", "Helvetica Neue", Helvetica, Roboto, Arial, sans-serif;
+    background: var(--bg-from);
+    min-height: 100vh; padding: 0 20px 40px; color: var(--text); line-height: 1.5;
+  }
+  .app { width: 100%; max-width: 1150px; margin: 0 auto; padding-top: 28px; }
+  h1 { color: var(--text-bright); text-align: left; font-size: 1.9rem; margin-bottom: 4px; letter-spacing: -0.3px; font-weight: 700; padding-bottom: 8px; border-bottom: 4px solid var(--green); }
+  .subtitle { color: var(--text-muted); text-align: left; margin: 8px 0 24px; font-size: 0.95rem; }
+  .layer-banner { display: flex; align-items: center; gap: 10px; margin: 28px 0 10px; }
+  .layer-banner .num { background: var(--accent-dark); color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+  .layer-banner .title { color: var(--text-bright); font-weight: 700; font-size: 1.1rem; }
+  .layer-banner .desc { color: var(--text-muted); font-size: 0.82rem; }
+  .panel { background: var(--surface); border: 1px solid var(--surface-border); border-radius: 4px; padding: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); margin-bottom: 16px; }
+  .row { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-end; }
+  .field { display: flex; flex-direction: column; gap: 4px; }
+  .field-label { font-size: 0.72rem; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
+  input[type=text], input[type=number], select, textarea {
+    font-family: inherit;
+    padding: 10px 12px; font-size: 0.9rem; border: 1px solid var(--text-muted); border-radius: 0; background: #fff; color: var(--text); height: 40px;
+  }
+  textarea { height: auto; font-family: monospace; font-size: 0.8rem; }
+  input:focus, select:focus, textarea:focus, button:focus-visible { outline: 0.25rem solid var(--focus); outline-offset: 0; }
+  .radio-row { display: flex; gap: 16px; align-items: center; height: 40px; }
+  .radio-label { display: flex; align-items: center; gap: 6px; font-size: 0.9rem; cursor: pointer; color: var(--text); }
+  .btn { border: 2px solid transparent; padding: 9px 16px; font-family: inherit; font-size: 0.95rem; line-height: 1.3; font-weight: 700; border-radius: 4px; cursor: pointer; color: #fff; background: var(--accent); }
+  .btn:hover { background: var(--accent-hover); }
+  .btn:disabled, .btn.secondary:disabled, .btn.green:disabled, .btn.danger:disabled { background: #e6e6e6; color: #1b1b1b; border-color: #a9aeb1; opacity: 1; cursor: not-allowed; }
+  .btn.secondary { background: #fff; border: 2px solid var(--accent); color: var(--accent-dark); padding: 9px 16px; }
+  .btn.secondary:hover { background: var(--surface-hover); border-color: var(--accent-hover); color: var(--accent-hover); }
+  .btn.green { background: var(--green); }
+  .btn.green:hover { background: var(--green-hover); }
+  .btn.danger { background: #fff; color: #8b0a03; border: 2px solid var(--danger); padding: 9px 16px; }
+  .btn.danger:hover { background: rgba(181,9,9,.08); }
+  .hint { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; line-height: 1.45; }
+  .section-title { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-bright); font-weight: 700; margin-bottom: 12px; }
+  .card { border: 1px solid var(--surface-border); border-left: 4px solid var(--surface-border); border-radius: 4px; padding: 12px 14px; margin-bottom: 10px; background: #fff; }
+  .card.active { border-color: var(--accent); background: var(--surface-hover); }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+  .card-name { font-weight: 700; color: var(--text-bright); }
+  .card-meta { font-size: 0.72rem; color: var(--text-subtle); }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip { background: #f0f0f0; border: 1px solid var(--surface-border); border-radius: 14px; padding: 3px 6px 3px 10px; font-size: 0.75rem; display: flex; align-items: center; gap: 5px; color: var(--text); }
+  .chip button { background: var(--text-subtle); color: #fff; border: none; border-radius: 50%; width: 15px; height: 15px; cursor: pointer; font-size: 0.65rem; }
+  .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .actions button { background: #fff; border: 1px solid var(--accent); color: var(--accent-dark); font-family: inherit; font-size: 0.82rem; font-weight: 700; cursor: pointer; padding: 5px 10px; border-radius: 4px; }
+  .actions button:hover { background: var(--surface-hover); }
+  .actions button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .group { border: 1px solid var(--surface-border); border-radius: 4px; margin-bottom: 14px; overflow: hidden; }
+  .group-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #f0f0f0; cursor: pointer; border-left: 4px solid var(--green); }
+  .group-head:hover { background: var(--surface-hover); }
+  .group-caret { font-size: 0.8rem; color: var(--text-muted); width: 14px; flex-shrink: 0; transition: transform 0.15s; }
+  .group-caret.open { transform: rotate(90deg); }
+  .group-title { font-weight: 700; color: var(--text-bright); font-size: 0.95rem; }
+  .group-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .group-tag { font-size: 0.68rem; background: rgba(0,94,162,.12); color: var(--accent-dark); border-radius: 10px; padding: 2px 8px; font-weight: 700; }
+  .group-count { font-size: 0.72rem; color: var(--text-subtle); margin-left: auto; }
+  .group-actions { display: flex; gap: 6px; }
+  .group-actions button { background: #fff; border: 1px solid var(--accent); color: var(--accent-dark); font-family: inherit; font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 4px 9px; border-radius: 4px; }
+  .group-body { padding: 12px 14px 4px; background: #fff; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th { text-align: left; padding: 10px 8px; background: var(--accent-dark); color: #fff; font-size: 0.72rem; position: sticky; top: 0; }
+  td { padding: 9px 8px; border-bottom: 1px solid var(--divider); white-space: pre; color: var(--text); background: #fff; }
+  tr:nth-child(even) td { background: #f9f9f9; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.subtotal td { font-weight: 700; color: var(--text-bright); background: #e7f2fa; }
+  tr.country-last td { border-bottom: 2px solid var(--green); }
+  .table-wrap { max-height: 520px; overflow: auto; border: 1px solid var(--surface-border); border-radius: 4px; }
+  .empty { text-align: center; color: var(--text-subtle); padding: 26px; }
+  .error { text-align: center; color: var(--danger); padding: 18px; font-size: 0.85rem; font-weight: 600; }
+  .col-editor-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .col-editor-row input { flex: 1; height: 34px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo, useCallback } = React;
+
+/* ==========================================================================
+   SHARED CONSTANTS
+   ========================================================================== */
+const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+const CENSUS_BASE = "https://api.census.gov/data/timeseries/intltrade";
+
+function toTitleCase(str) {
+  if (!str) return str;
+  const minor = new Set(["a","an","and","as","at","but","by","for","in","nor","of","on","or","per","the","to","vs","via"]);
+  const words = str.toLowerCase().split(" ");
+  return words.map((w, i) => {
+    if (!w) return w;
+    const m = w.match(/[.,;:]+$/); const punct = m ? m[0] : "";
+    const core = punct ? w.slice(0, -punct.length) : w;
+    if (i > 0 && i < words.length - 1 && minor.has(core)) return w;
+    if (/^[a-z]{2}$/.test(core)) return core.toUpperCase() + punct;
+    return core.split("-").map(s => s.charAt(0).toUpperCase() + s.slice(1)).join("-") + punct;
+  }).join(" ");
+}
+
+function parseCodeList(text) {
+  return (text || "").split(/[,\n]/).map(s => s.trim()).filter(Boolean).map(s => {
+    const wildcard = s.endsWith("*");
+    return { code: wildcard ? s.slice(0, -1) : s, wildcard };
+  });
+}
+
+function codeMatchesEntry(rowCode, entry) {
+  return entry.wildcard ? String(rowCode).startsWith(entry.code) : String(rowCode) === entry.code;
+}
+
+/* ==========================================================================
+   LOCALSTORAGE HELPERS
+   ========================================================================== */
+const LS_KEYS = { categories: "pipeline_categories_v1", templates: "pipeline_templates_v1", session: "pipeline_session_v1", groups: "pipeline_groups_v1" };
+function loadLS(key, fallback) {
+  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch (e) { return fallback; }
+}
+function saveLS(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) {} }
+function makeId(prefix) { return prefix + "_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+
+/* ==========================================================================
+   LAYER 1 — DATA ACQUISITION
+   Talks to the Census Bureau API. Owns Saved Queries and Saved Categories.
+   Produces one artifact: rawRows (array of flat, normalized objects).
+   ========================================================================== */
+
+async function resolveFields(flowKey, datasetKey, cache) {
+  const cacheKey = flowKey + "/" + datasetKey;
+  if (cache[cacheKey]) return cache[cacheKey];
+  const resp = await fetch(`${CENSUS_BASE}/${flowKey}/${datasetKey}/variables.json`);
+  if (!resp.ok) throw new Error(`Could not load field definitions (HTTP ${resp.status}).`);
+  const data = await resp.json();
+  const vars = data.variables || {};
+  const exclude = new Set(["CTY_CODE","CTY_NAME","CTY_SUBCODE","DISTRICT","DIST_NAME","RP","time","YEAR","MONTH","SUMMARY_LVL","SUMMARY_LVL2","LAST_UPDATE","DF","COMM_LVL","STATE","PORT"]);
+  const entries = Object.entries(vars).filter(([n]) => !exclude.has(n)).map(([name, meta]) => ({ name, label: meta.label || "", predicateType: meta.predicateType || "string" }));
+  const codeVar = entries.find(v => /code/i.test(v.label) && !/description/i.test(v.label));
+  const descVar = entries.find(v => /sdesc$/i.test(v.name)) || entries.find(v => /ldesc$/i.test(v.name)) || entries.find(v => /description/i.test(v.label));
+  const valMoVar = entries.find(v => /total value/i.test(v.label) && !/year-to-date/i.test(v.label) && /general/i.test(v.label)) || entries.find(v => /total value/i.test(v.label) && !/year-to-date/i.test(v.label));
+  const valYrVar = entries.find(v => /total value/i.test(v.label) && /year-to-date/i.test(v.label) && /general/i.test(v.label)) || entries.find(v => /total value/i.test(v.label) && /year-to-date/i.test(v.label));
+
+  const byName = n => (vars[n] ? { name: n, label: vars[n].label || "", predicateType: vars[n].predicateType || "string" } : null);
+  const firstVar = (re, extra = () => true) => entries.find(v => re.test(v.name) && extra(v));
+  const pickQty = (slot, period) => {
+    const exact = byName(`QTY_${slot}_${period}`);
+    if (exact) return exact;
+    const ytd = period === "YR";
+    const cands = entries.filter(v =>
+      new RegExp(`QY${slot}`, "i").test(v.name) &&
+      (ytd ? /_YR$/i.test(v.name) : /_MO$/i.test(v.name)));
+    return cands.find(v => /^GEN/i.test(v.name)) || cands.find(v => /^CON/i.test(v.name)) || cands[0] || null;
+  };
+  const q1mo = pickQty("1", "MO"), q1yr = pickQty("1", "YR");
+  const q2mo = pickQty("2", "MO"), q2yr = pickQty("2", "YR");
+  const unit1 = byName("UNIT_QY1") || firstVar(/UNIT_QY1/i) || firstVar(/UNIT.*1/i);
+  const unit2 = byName("UNIT_QY2") || firstVar(/UNIT_QY2/i) || firstVar(/UNIT.*2/i);
+
+  const resolved = {
+    codeParam: codeVar ? codeVar.name : null, descParam: descVar ? descVar.name : null,
+    valMoParam: valMoVar ? valMoVar.name : null, valYrParam: valYrVar ? valYrVar.name : null,
+    valMoLabel: valMoVar ? valMoVar.label : "Value (Month)", valYrLabel: valYrVar ? valYrVar.label : "Value (Year-to-Date)",
+    qtyParams: {
+      QTY_1_MO: q1mo ? q1mo.name : null, QTY_1_YR: q1yr ? q1yr.name : null,
+      QTY_2_MO: q2mo ? q2mo.name : null, QTY_2_YR: q2yr ? q2yr.name : null,
+      UNIT_QY1: unit1 ? unit1.name : null, UNIT_QY2: unit2 ? unit2.name : null
+    },
+    rawEntries: entries
+  };
+  cache[cacheKey] = resolved;
+  return resolved;
+}
+
+function buildYearMonthGroups(sy, sm, ey, em) {
+  const groups = {}; let y = sy, m = sm, guard = 0;
+  while ((y < ey || (y === ey && m <= em)) && guard < 240) {
+    if (!groups[y]) groups[y] = [];
+    groups[y].push(String(m).padStart(2, "0"));
+    m++; if (m > 12) { m = 1; y++; } guard++;
+  }
+  return groups;
+}
+
+function reduceGroupsToAnnual(groups) {
+  const out = {};
+  Object.keys(groups).forEach(y => { out[y] = [groups[y][groups[y].length - 1]]; });
+  return out;
+}
+
+function buildUrl(flowKey, datasetKey, fields, codes, countryCodes, districtCodes, extraFields, year, months, apiKey) {
+  const hasDistrict = districtCodes && districtCodes.length;
+  const qp = fields.qtyParams || {};
+  const extraReal = (extraFields || []).map(k => qp[k]).filter(Boolean);
+  const getFields = ["CTY_CODE", "CTY_NAME", ...(hasDistrict ? ["DISTRICT", "DIST_NAME"] : []),
+    fields.codeParam, fields.descParam, fields.valMoParam, fields.valYrParam, ...extraReal].filter(Boolean);
+  const params = new URLSearchParams();
+  params.set("get", getFields.join(","));
+  params.set("YEAR", year);
+  months.forEach(mo => params.append("MONTH", mo));
+  if (countryCodes && countryCodes.length) countryCodes.forEach(c => params.append("CTY_CODE", c));
+  if (hasDistrict) districtCodes.forEach(d => params.append("DISTRICT", d));
+  if (flowKey === "exports") params.set("DF", "1");
+  if (codes && codes.length && fields.codeParam) codes.forEach(c => params.append(fields.codeParam, c));
+  if (apiKey) params.set("key", apiKey);
+  return `${CENSUS_BASE}/${flowKey}/${datasetKey}?${params.toString()}`;
+}
+
+async function fetchTradeForYear(flowKey, datasetKey, fields, codes, countryCodes, districtCodes, extraFields, year, months, apiKey) {
+  const url = buildUrl(flowKey, datasetKey, fields, codes, countryCodes, districtCodes, extraFields, year, months, apiKey);
+  const resp = await fetch(url);
+  if (resp.status === 204) return [];
+  if (!resp.ok) { const body = await resp.text().catch(() => ""); throw new Error(`Census API returned ${resp.status} for ${year}. ${body.slice(0, 200)}`); }
+  const data = await resp.json();
+  const [header, ...rows] = data;
+  const ctyIdx = header.indexOf("CTY_CODE");
+  return rows.filter(r => {
+    const c = ctyIdx >= 0 ? (r[ctyIdx] || "") : "";
+    return !(/x/i.test(c) || c.startsWith("00"));
+  }).map(r => {
+    const obj = {}; header.forEach((h, i) => obj[h] = r[i]);
+    const row = {
+      Country: toTitleCase(obj["CTY_NAME"] || ""),
+      District: toTitleCase(obj["DIST_NAME"] || "TOTAL FOR ALL DISTRICTS"),
+      Code: fields.codeParam ? (obj[fields.codeParam] || "") : "",
+      Description: toTitleCase(fields.descParam ? (obj[fields.descParam] || "") : ""),
+      ValMo: Number(obj[fields.valMoParam] || 0),
+      ValYr: Number(obj[fields.valYrParam] || 0),
+      Year: obj["YEAR"] || year,
+      Month: MONTH_NAMES[(parseInt(obj["MONTH"] || months[0] || "1", 10) - 1)] || (obj["MONTH"] || "")
+    };
+    (extraFields || []).forEach(k => {
+      const realName = (fields.qtyParams || {})[k];
+      if (!realName) { row[k] = (typeof row[k] === "number") ? row[k] : ""; return; }
+      if (k === "UNIT_QY1" || k === "UNIT_QY2") { row[k] = obj[realName] || ""; return; }
+      const item = (fields.rawEntries || []).find(v => v.name === realName);
+      row[k] = item && item.predicateType === "int" ? Number(obj[realName] || 0) : (obj[realName] || "");
+    });
+    return row;
+  });
+}
+
+async function fetchTradeRange(flowKey, datasetKey, fields, codes, countryCodes, districtCodes, extraFields, sy, sm, ey, em, apiKey, granularity) {
+  let groups = buildYearMonthGroups(sy, sm, ey, em);
+  if (granularity === "annual") groups = reduceGroupsToAnnual(groups);
+  const merged = [];
+  for (const year of Object.keys(groups)) {
+    const rows = await fetchTradeForYear(flowKey, datasetKey, fields, codes, countryCodes, districtCodes, extraFields, year, groups[year], apiKey);
+    merged.push(...(granularity === "annual" ? rows.map(r => ({ ...r, Month: "" })) : rows));
+  }
+  return merged;
+}
+
+/* ==========================================================================
+   GROUPS + CATEGORIES
+   A group is the render/organization unit (== a sheet/table). It carries
+   commodity/publication/table tags and contains categories via each
+   category's groupId. Categories without a group fall into an implicit
+   "Ungrouped" bucket at render time.
+   ========================================================================== */
+const UNGROUPED_ID = "__ungrouped__";
+
+function CategoryManager({ categories, setCategories, groups, setGroups, includedIds, setIncludedIds, formCodesText }) {
+  const [openGroups, setOpenGroups] = useState(() => new Set());
+
+  function persistCats(next) { setCategories(next); saveLS(LS_KEYS.categories, next); }
+  function persistGroups(next) { setGroups(next); saveLS(LS_KEYS.groups, next); }
+
+  // Ensure a group exists by name; returns its id. Creates it (optionally with tags) if missing.
+  function ensureGroup(name, tags) {
+    const existing = groups.find(g => g.name.toLowerCase() === name.toLowerCase());
+    if (existing) return existing.id;
+    const g = { id: makeId("grp"), name: name.trim(), commodity: (tags && tags.commodity) || "", publication: (tags && tags.publication) || "", table: (tags && tags.table) || "" };
+    persistGroups([...groups, g]);
+    return g.id;
+  }
+
+  function saveCurrentSelectionAsCategory() {
+    const codes = parseCodeList(formCodesText);
+    if (!codes.length) { alert("Type one or more HTS codes into the Commodity Code(s) field first."); return; }
+    const name = prompt('Name this category (e.g. "Unwrought, unalloyed zinc"):', "");
+    if (!name || !name.trim()) return;
+    const cat = { id: makeId("cat"), name: name.trim(), aggregate: true, codes, groupId: null };
+    persistCats([...categories, cat]);
+  }
+  function newBlankCategory() {
+    const name = prompt("Category name:", "");
+    if (!name || !name.trim()) return;
+    const raw = prompt("HTS codes, comma-separated (trailing * for a wildcard/prefix group):", "");
+    if (raw === null) return;
+    const cat = { id: makeId("cat"), name: name.trim(), aggregate: true, codes: parseCodeList(raw), groupId: null };
+    persistCats([...categories, cat]);
+  }
+  function toggleAggregate(id) { persistCats(categories.map(c => c.id === id ? { ...c, aggregate: !c.aggregate } : c)); }
+  function toggleIncluded(id) {
+    const next = new Set(includedIds);
+    next.has(id) ? next.delete(id) : next.add(id);
+    setIncludedIds(next);
+  }
+  function renameCategory(id) {
+    const cat = categories.find(c => c.id === id);
+    const name = prompt("Category name:", cat.name);
+    if (name && name.trim()) persistCats(categories.map(c => c.id === id ? { ...c, name: name.trim() } : c));
+  }
+  function deleteCategory(id) {
+    const cat = categories.find(c => c.id === id);
+    if (!confirm(`Delete category "${cat.name}"?`)) return;
+    const next = new Set(includedIds); next.delete(id); setIncludedIds(next);
+    persistCats(categories.filter(c => c.id !== id));
+  }
+  function removeCode(catId, code) {
+    persistCats(categories.map(c => c.id === catId ? { ...c, codes: c.codes.filter(x => x.code !== code) } : c));
+  }
+  // Move-to-group: prompt for a group name; create it if new; assign the category.
+  function moveToGroup(id) {
+    const cat = categories.find(c => c.id === id);
+    const current = groups.find(g => g.id === cat.groupId);
+    const name = prompt("Move to group (type a name; a new group is created if it doesn't exist).\nLeave blank and press OK to remove from its group.", current ? current.name : "");
+    if (name === null) return; // cancelled
+    if (!name.trim()) { persistCats(categories.map(c => c.id === id ? { ...c, groupId: null } : c)); return; }
+    const gid = ensureGroup(name.trim());
+    persistCats(categories.map(c => c.id === id ? { ...c, groupId: gid } : c));
+    setOpenGroups(prev => new Set(prev).add(gid));
+  }
+
+  function editGroupTags(gid) {
+    const g = groups.find(x => x.id === gid);
+    const commodity = prompt("Commodity (e.g. Zinc):", g.commodity || "");
+    if (commodity === null) return;
+    const publication = prompt("Publication (MIS / MYB / MCS):", g.publication || "");
+    if (publication === null) return;
+    const table = prompt("Table (e.g. Table 11):", g.table || "");
+    if (table === null) return;
+    persistGroups(groups.map(x => x.id === gid ? { ...x, commodity: commodity.trim(), publication: publication.trim(), table: table.trim() } : x));
+  }
+  function renameGroup(gid) {
+    const g = groups.find(x => x.id === gid);
+    const name = prompt("Group name:", g.name);
+    if (name && name.trim()) persistGroups(groups.map(x => x.id === gid ? { ...x, name: name.trim() } : x));
+  }
+  function deleteGroup(gid) {
+    const g = groups.find(x => x.id === gid);
+    const members = categories.filter(c => c.groupId === gid);
+    if (!confirm(`Delete group "${g.name}"?` + (members.length ? `\nIts ${members.length} categor${members.length===1?"y":"ies"} will become Ungrouped (not deleted).` : ""))) return;
+    persistCats(categories.map(c => c.groupId === gid ? { ...c, groupId: null } : c));
+    persistGroups(groups.filter(x => x.id !== gid));
+  }
+
+  function exportCategories() {
+    if (!categories.length) { alert("No categories to export yet."); return; }
+    const payload = { groups, categories };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "census_categories.json"; a.click();
+    URL.revokeObjectURL(url);
+  }
+  function loadSavedSearch(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const parsed = JSON.parse(reader.result);
+        // Accept either the new {groups, categories} shape or a bare categories array (legacy).
+        const impCats = Array.isArray(parsed) ? parsed : (parsed.categories || []);
+        const impGroups = Array.isArray(parsed) ? [] : (parsed.groups || []);
+        if (!Array.isArray(impCats)) throw new Error("No categories found in file.");
+        // Merge groups by name
+        const gByName = new Map(groups.map(g => [g.name.toLowerCase(), g]));
+        impGroups.forEach(g => { if (g && g.name) gByName.set(g.name.toLowerCase(), { id: g.id || makeId("grp"), name: g.name, commodity: g.commodity||"", publication: g.publication||"", table: g.table||"" }); });
+        const mergedGroups = Array.from(gByName.values());
+        const gIdByOld = new Map(impGroups.map(g => [g.id, (gByName.get((g.name||"").toLowerCase())||{}).id]));
+        // Merge categories by name
+        const cByName = new Map(categories.map(c => [c.name, c]));
+        let count = 0;
+        impCats.forEach(cat => {
+          if (!cat || !cat.name || !Array.isArray(cat.codes)) return;
+          const remappedGroup = cat.groupId ? (gIdByOld.get(cat.groupId) || null) : null;
+          cByName.set(cat.name, { id: cat.id || makeId("cat"), name: cat.name, aggregate: cat.aggregate !== false, codes: cat.codes, groupId: remappedGroup });
+          count++;
+        });
+        persistGroups(mergedGroups);
+        persistCats(Array.from(cByName.values()));
+        alert(`Loaded ${count} categor${count === 1 ? "y" : "ies"} from the file.`);
+      } catch (err) {
+        alert("Couldn't load that file: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  }
+
+  function toggleOpen(gid) { setOpenGroups(prev => { const n = new Set(prev); n.has(gid) ? n.delete(gid) : n.add(gid); return n; }); }
+
+  // Build the render buckets: each real group (in order) + an Ungrouped bucket at the end.
+  const buckets = [
+    ...groups.map(g => ({ group: g, cats: categories.filter(c => c.groupId === g.id) })),
+    { group: { id: UNGROUPED_ID, name: "Ungrouped", commodity:"", publication:"", table:"" }, cats: categories.filter(c => !c.groupId || !groups.some(g => g.id === c.groupId)) }
+  ].filter(b => b.group.id !== UNGROUPED_ID || b.cats.length > 0);
+
+  function renderCategoryCard(cat) {
+    return (
+      <div key={cat.id} className={"card" + (includedIds.has(cat.id) ? " active" : "")}>
+        <div className="card-top">
+          <div>
+            <div className="card-name">{cat.name}</div>
+            <div className="card-meta">{cat.codes.length} code{cat.codes.length === 1 ? "" : "s"}</div>
+          </div>
+          <div className="actions">
+            <label style={{display:"flex",alignItems:"center",gap:5,fontSize:"0.75rem",fontWeight:600}}>
+              <input type="checkbox" checked={!!cat.aggregate} onChange={() => toggleAggregate(cat.id)} /> Aggregate
+            </label>
+            <button className={includedIds.has(cat.id) ? "active" : ""} onClick={() => toggleIncluded(cat.id)}>
+              {includedIds.has(cat.id) ? "✓ In Query" : "Use in Query"}
+            </button>
+            <button onClick={() => renameCategory(cat.id)}>Rename</button>
+            <button onClick={() => moveToGroup(cat.id)}>Move to group</button>
+            <button onClick={() => deleteCategory(cat.id)} style={{color:"var(--danger)"}}>Delete</button>
+          </div>
+        </div>
+        <div className="chip-row">
+          {cat.codes.map(c => (
+            <span className="chip" key={c.code}>{c.code}{c.wildcard ? "*" : ""}
+              <button onClick={() => removeCode(cat.id, c.code)}>×</button>
+            </span>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="panel">
+      <div className="section-title">Saved Categories</div>
+      <p className="hint" style={{marginBottom: 12}}>A category is a named group of HTS codes. Categories are organized into <b>groups</b> — each group is a sheet/table (tagged with commodity / publication / table) and holds the category queries that table needs. Use "Move to group" on a category to file it (type a new name to create a group). "In Query" unions a category's codes into the fetch; "Aggregate" adds a per-category subtotal row.</p>
+      <div className="actions" style={{marginBottom: 12}}>
+        <button onClick={saveCurrentSelectionAsCategory}>💾 Save Commodity Code(s) field as category</button>
+        <button onClick={newBlankCategory}>＋ New category</button>
+        <button onClick={exportCategories}>⬇ Export categories (.json)</button>
+        <label style={{display:"inline-flex",alignItems:"center",gap:5,cursor:"pointer",border:"1px solid var(--surface-border)",borderRadius:6,padding:"5px 9px",fontSize:"0.72rem",fontWeight:600,color:"var(--accent-light)"}}>
+          📂 Load Saved Search
+          <input type="file" accept="application/json" onChange={loadSavedSearch} style={{display:"none"}} />
+        </label>
+      </div>
+      {categories.length === 0 && <div className="empty">No saved categories yet.</div>}
+
+      {buckets.map(({ group, cats }) => {
+        const isUngrouped = group.id === UNGROUPED_ID;
+        const open = openGroups.has(group.id);
+        return (
+          <div className="group" key={group.id}>
+            <div className="group-head" onClick={() => toggleOpen(group.id)}>
+              <span className={"group-caret" + (open ? " open" : "")}>▶</span>
+              <span className="group-title">{group.name}</span>
+              {!isUngrouped && (group.commodity || group.publication || group.table) && (
+                <span className="group-tags">
+                  {group.commodity && <span className="group-tag">{group.commodity}</span>}
+                  {group.publication && <span className="group-tag">{group.publication}</span>}
+                  {group.table && <span className="group-tag">{group.table}</span>}
+                </span>
+              )}
+              <span className="group-count">{cats.length} categor{cats.length === 1 ? "y" : "ies"}</span>
+              {!isUngrouped && (
+                <span className="group-actions" onClick={e => e.stopPropagation()}>
+                  <button onClick={() => editGroupTags(group.id)}>Tags</button>
+                  <button onClick={() => renameGroup(group.id)}>Rename</button>
+                  <button onClick={() => deleteGroup(group.id)} style={{color:"var(--danger)"}}>Delete</button>
+                </span>
+              )}
+            </div>
+            {open && (
+              <div className="group-body">
+                {cats.length === 0 ? <div className="empty" style={{padding:14}}>No categories in this group.</div> : cats.map(renderCategoryCard)}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ==========================================================================
+   LAYER 2 — DATA PROCESSING
+   ========================================================================== */
+const KG_TO_UNIT_FACTOR = { kg: 1, mt: 1/1000, st: 1/907.18474, lb: 2.2046226218 };
+
+function findCategoryForCode(code, activeCats) {
+  for (const cat of activeCats) if (cat.codes.some(c => codeMatchesEntry(code, c))) return cat;
+  return null;
+}
+const KG_BASED_NATIVE_UNITS = new Set(["KG", "CKG", "CTN"]); // CKG = Content kilograms, CTN = Content metric tons (CBP Appendix K) — both are "content" counterparts to gross-weight KG/MT reporting
+function convertQty(nativeUnit, value, targetUnit) {
+  if (!targetUnit || typeof value !== "number") return value;
+  if (!KG_BASED_NATIVE_UNITS.has((nativeUnit || "").trim().toUpperCase())) return value;
+  const factor = KG_TO_UNIT_FACTOR[targetUnit];
+  return factor ? value * factor : value;
+}
+
+function processRows(rawRows, activeCats) {
+  const tagged = rawRows.map(r => {
+    const cat = findCategoryForCode(r.Code, activeCats);
+    return { ...r, Category: cat ? cat.name : "", _categoryId: cat ? cat.id : null,
+      _aggregate: !!(cat && cat.aggregate), _catCodeCount: cat ? cat.codes.length : 0 };
+  });
+
+  const isAllCountries = name => /total for all countries/i.test(name || "");
+  tagged.forEach(r => { r._allCountries = isAllCountries(r.Country); });
+
+  tagged.sort((a, b) =>
+    String(a.Year).localeCompare(String(b.Year)) ||
+    (a._allCountries - b._allCountries) ||
+    (a.Country || "").localeCompare(b.Country || "") ||
+    (a.Description || "").localeCompare(b.Description || "") ||
+    String(a.Code).localeCompare(String(b.Code)));
+
+  const catKey = r => [r._categoryId, r.Country, r.District, r.Year, r.Month].join("|");
+  const areaKey = r => [r.Country, r.District, r.Year, r.Month].join("|");
+
+  const subtotals = new Map();
+  tagged.forEach(r => {
+    if (!(r._aggregate && r._catCodeCount > 1)) return;
+    const key = catKey(r);
+    if (!subtotals.has(key)) {
+      subtotals.set(key, { Year: r.Year, Month: r.Month, Country: r.Country, District: r.District,
+        Category: r.Category, Description: "    " + r.Category + " total", UNIT_QY1: r.UNIT_QY1, UNIT_QY2: r.UNIT_QY2,
+        ValMo: 0, ValYr: 0, QTY_1_MO: 0, QTY_1_YR: 0, QTY_2_MO: 0, QTY_2_YR: 0, _codes: new Set(),
+        _subtotal: true, _areaKey: areaKey(r), _allCountries: r._allCountries });
+    }
+    const g = subtotals.get(key);
+    g._codes.add(r.Code); g.ValMo += (Number(r.ValMo) || 0); g.ValYr += (Number(r.ValYr) || 0);
+    ["QTY_1_MO", "QTY_1_YR", "QTY_2_MO", "QTY_2_YR"].forEach(k => { if (typeof r[k] === "number") g[k] += r[k]; });
+  });
+  subtotals.forEach(g => { g.Code = Array.from(g._codes).sort().join(" | "); });
+
+  const subsByArea = new Map();
+  subtotals.forEach(g => {
+    if (!subsByArea.has(g._areaKey)) subsByArea.set(g._areaKey, []);
+    subsByArea.get(g._areaKey).push(g);
+  });
+
+  const lastIndexOfArea = new Map();
+  tagged.forEach((r, i) => { if (subsByArea.has(areaKey(r))) lastIndexOfArea.set(areaKey(r), i); });
+
+  const out = [];
+  tagged.forEach((r, i) => {
+    out.push(r);
+    const ak = areaKey(r);
+    if (subsByArea.has(ak) && lastIndexOfArea.get(ak) === i) {
+      subsByArea.get(ak).forEach(g => out.push(g));
+    }
+  });
+
+  for (let i = 0; i < out.length; i++) {
+    const cur = out[i], nxt = out[i + 1];
+    const boundary = !nxt || cur.Country !== nxt.Country || String(cur.Year) !== String(nxt.Year);
+    if (boundary) cur._countryLast = true;
+  }
+  return out;
+}
+
+/* ==========================================================================
+   LAYER 3 — DATA PRESENTATION
+   ========================================================================== */
+const AVAILABLE_FIELDS = [
+  { key: "Year", label: "Year" },
+  { key: "Month", label: "Month" },
+  { key: "Country", label: "Country" },
+  { key: "District", label: "District" },
+  { key: "Category", label: "Category" },
+  { key: "Code", label: "Code" },
+  { key: "Description", label: "Description" },
+  { key: "ValMo", label: "Value (Month)" },
+  { key: "VAL_DESC_1", label: "Value Desc 1" },
+  { key: "ValYr", label: "Value (Year)" },
+  { key: "VAL_DESC_2", label: "Value Desc 2" },
+  { key: "QTY_1_MO", label: "Quantity 1 (Month)" },
+  { key: "QTY_1_YR", label: "Quantity 1 (Year)" },
+  { key: "UNIT_QY1", label: "Unit 1" },
+  { key: "QTY_2_MO", label: "Quantity 2 (Month)" },
+  { key: "QTY_2_YR", label: "Quantity 2 (Year)" },
+  { key: "UNIT_QY2", label: "Unit 2" }
+];
+
+const QUANTITY_UNIT_DEFS = {
+  native:  { unit: null, scale: 1,    label: "Native (as reported)" },
+  kg:      { unit: "kg", scale: 1,    label: "Kilograms" },
+  mt:      { unit: "mt", scale: 1,    label: "Metric Tons" },
+  mt_000:  { unit: "mt", scale: 1000, label: "Thousand Metric Tons" },
+  st:      { unit: "st", scale: 1,    label: "Short Tons" },
+  st_000:  { unit: "st", scale: 1000, label: "Thousand Short Tons" },
+  lb:      { unit: "lb", scale: 1,    label: "Pounds" },
+  lb_000:  { unit: "lb", scale: 1000, label: "Thousand Pounds" }
+};
+const VALUE_MAGNITUDE_DEFS = {
+  actual:    { scale: 1,       suffix: "",        label: "Actual" },
+  thousands: { scale: 1/1000,  suffix: " ($000)", label: "Thousands" },
+  millions:  { scale: 1/1e6,   suffix: " ($M)",    label: "Millions" }
+};
+
+function computeDescriptorContext(columns) {
+  const findUnit = key => (columns.find(c => c.key === key) || {}).unitCode || "native";
+  // VAL_DESC_1/VAL_DESC_2 describe the 1st and 2nd Value column present in the template,
+  // in column order — whichever of ValMo/ValYr that actually is — not a fixed ValMo/ValYr
+  // pairing, so a template with only one Value column (either period) still resolves correctly.
+  const valueCols = columns.filter(c => c.key === "ValMo" || c.key === "ValYr");
+  const findMagnitudeByIndex = idx => (valueCols[idx] || {}).magnitudeCode || "actual";
+  return {
+    UNIT_QY1: findUnit("UNIT_QY1"), UNIT_QY2: findUnit("UNIT_QY2"),
+    VAL_DESC_1: findMagnitudeByIndex(0), VAL_DESC_2: findMagnitudeByIndex(1)
+  };
+}
+
+function getCellValue(row, col, ctx) {
+  if (col.key === "UNIT_QY1" || col.key === "UNIT_QY2") {
+    const def = QUANTITY_UNIT_DEFS[ctx[col.key]] || QUANTITY_UNIT_DEFS.native;
+    return def.unit === null ? row[col.key] : def.label;
+  }
+  if (col.key === "QTY_1_MO" || col.key === "QTY_1_YR" || col.key === "QTY_2_MO" || col.key === "QTY_2_YR") {
+    const unitKey = col.key.startsWith("QTY_1") ? "UNIT_QY1" : "UNIT_QY2";
+    const def = QUANTITY_UNIT_DEFS[ctx[unitKey]] || QUANTITY_UNIT_DEFS.native;
+    const raw = row[col.key];
+    if (def.unit === null || typeof raw !== "number") return raw;
+    const converted = convertQty(row[unitKey], raw, def.unit);
+    return typeof converted === "number" ? converted / def.scale : converted;
+  }
+  // VAL_DESC_1/VAL_DESC_2 are read-only descriptor columns, same idea as UNIT_QY1/UNIT_QY2:
+  // they display whatever magnitude (Actual/Thousands/Millions) is set on the 1st/2nd Value
+  // column present in the template — no separate selector of their own.
+  if (col.key === "VAL_DESC_1" || col.key === "VAL_DESC_2") {
+    const def = VALUE_MAGNITUDE_DEFS[ctx[col.key]] || VALUE_MAGNITUDE_DEFS.actual;
+    return def.label;
+  }
+  if (col.key === "ValMo" || col.key === "ValYr") {
+    const def = VALUE_MAGNITUDE_DEFS[col.magnitudeCode] || VALUE_MAGNITUDE_DEFS.actual;
+    const raw = row[col.key];
+    return typeof raw === "number" ? raw * def.scale : raw;
+  }
+  return row[col.key];
+}
+
+const DEFAULT_TEMPLATES = [
+  { id: "tpl_detail", name: "Detail (all columns)", columns: [
+      { key: "Year", label: "Year" }, { key: "Month", label: "Month" }, { key: "Country", label: "Country" },
+      { key: "Category", label: "Category" }, { key: "Code", label: "Code" }, { key: "Description", label: "Description" },
+      { key: "ValMo", label: "Value (Month)", magnitudeCode: "actual" }, { key: "ValYr", label: "Value (Year)", magnitudeCode: "actual" },
+      { key: "QTY_1_MO", label: "Quantity 1 (Month)" }, { key: "QTY_1_YR", label: "Quantity 1 (Year)" }, { key: "UNIT_QY1", label: "Unit 1", unitCode: "native" }
+  ]},
+  { id: "tpl_summary", name: "Category Summary", columns: [
+      { key: "Year", label: "Year" }, { key: "Country", label: "Country" }, { key: "Category", label: "Category" },
+      { key: "Code", label: "Codes Included" }, { key: "ValYr", label: "Value (Year)", magnitudeCode: "actual" },
+      { key: "QTY_1_YR", label: "Quantity 1 (Year)" }, { key: "UNIT_QY1", label: "Unit 1", unitCode: "native" }
+  ]}
+];
+
+// CSV headers for Unit 1/Unit 2 columns should always read "Unit 1"/"Unit 2",
+// not the currently-selected unit name (c.label holds e.g. "Metric Tons" for
+// on-screen display, which stays as-is in the table — only the export header differs).
+function exportHeaderFor(c) {
+  if (c.key === "UNIT_QY1" || c.key === "UNIT_QY2" || c.key === "ValMo" || c.key === "ValYr") {
+    const meta = AVAILABLE_FIELDS.find(f => f.key === c.key);
+    return meta ? meta.label : (c.label || c.key);
+  }
+  return c.label || c.key;
+}
+
+function fmtNum(n) {
+  if (typeof n !== "number") return n || "--";
+  if (n !== 0 && Math.abs(n) < 0.5) return (n < 0 ? "-½" : "½");
+  return Math.round(n).toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
+function TemplateManager({ templates, setTemplates, activeId, setActiveId }) {
+  const active = templates.find(t => t.id === activeId) || templates[0];
+  const [editingCell, setEditingCell] = useState(null);
+  function persist(next) { setTemplates(next); saveLS(LS_KEYS.templates, next); }
+  function updateActive(fn) { persist(templates.map(t => t.id === active.id ? fn(t) : t)); }
+  function addColumn() {
+    updateActive(t => ({ ...t, columns: [...t.columns, { key: "", label: "" }] }));
+    setEditingCell({ index: active.columns.length, part: "field" });
+  }
+  function updateColumn(i, field, value) {
+    updateActive(t => ({ ...t, columns: t.columns.map((c, idx) => idx === i ? { ...c, [field]: value } : c) }));
+  }
+  function removeColumn(i) { updateActive(t => ({ ...t, columns: t.columns.filter((_, idx) => idx !== i) })); }
+  function chooseField(i, key) {
+    const meta = AVAILABLE_FIELDS.find(f => f.key === key);
+    updateActive(t => ({ ...t, columns: t.columns.map((c, idx) => {
+      if (idx !== i) return c;
+      if (key === "UNIT_QY1" || key === "UNIT_QY2") {
+        const code = c.unitCode || "native";
+        return { key, label: QUANTITY_UNIT_DEFS[code].label, unitCode: code };
+      }
+      if (key === "ValMo" || key === "ValYr") {
+        const code = c.magnitudeCode || "actual";
+        return { key, label: (meta ? meta.label : key) + VALUE_MAGNITUDE_DEFS[code].suffix, magnitudeCode: code };
+      }
+      return { key, label: c.label || (meta ? meta.label : key) };
+    }) }));
+    setEditingCell(null);
+  }
+  function setLabel(i, label) { updateColumn(i, "label", label); setEditingCell(null); }
+  function setUnitCode(i, code) {
+    const def = QUANTITY_UNIT_DEFS[code];
+    updateActive(t => {
+      const changedKey = t.columns[i].key;
+      const columns = t.columns.map((c, idx) => idx === i ? { ...c, unitCode: code, label: def.label } : c);
+      // Convenience: picking a magnitude for Unit 1 mirrors it onto any Unit 2 column too.
+      // This only sets which target unit to display in — it does NOT skip the native-unit
+      // validity check in convertQty, which still gates conversion on what each row actually
+      // reports for UNIT_QY2 (e.g. KG/CKG/CTN), independent of what Unit 1 is set to.
+      if (changedKey === "UNIT_QY1") {
+        return { ...t, columns: columns.map(c => c.key === "UNIT_QY2" ? { ...c, unitCode: code, label: def.label } : c) };
+      }
+      return { ...t, columns };
+    });
+    setEditingCell(null);
+  }
+  function setMagnitudeCode(i, code) {
+    const def = VALUE_MAGNITUDE_DEFS[code];
+    updateActive(t => ({ ...t, columns: t.columns.map((c, idx) => {
+      if (idx !== i) return c;
+      const meta = AVAILABLE_FIELDS.find(f => f.key === c.key);
+      return { ...c, magnitudeCode: code, label: (meta ? meta.label : c.key) + def.suffix };
+    }) }));
+    setEditingCell(null);
+  }
+  function newTemplate() {
+    const name = prompt("Template name:", "");
+    if (!name || !name.trim()) return;
+    const tpl = { id: makeId("tpl"), name: name.trim(), columns: [{ key: "Country", label: "Country" }, { key: "ValYr", label: "Value" }] };
+    persist([...templates, tpl]); setActiveId(tpl.id);
+  }
+  function deleteTemplate(id) {
+    if (templates.length <= 1) { alert("Keep at least one template."); return; }
+    if (!confirm("Delete this template?")) return;
+    const next = templates.filter(t => t.id !== id);
+    persist(next);
+    if (activeId === id) setActiveId(next[0].id);
+  }
+  function exportJson() {
+    const blob = new Blob([JSON.stringify(active, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = `${active.name.replace(/\s+/g,"_")}.json`; a.click();
+    URL.revokeObjectURL(url);
+  }
+  function importJson(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const tpl = JSON.parse(reader.result);
+        if (!tpl.columns) throw new Error("Missing 'columns' array.");
+        const withId = { id: makeId("tpl"), name: tpl.name || "Imported Template", columns: tpl.columns };
+        persist([...templates, withId]); setActiveId(withId.id);
+      } catch (err) { alert("Couldn't load that template: " + err.message); }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  }
+
+  return (
+    <div className="panel">
+      <div className="section-title">Presentation Templates</div>
+      <p className="hint" style={{marginBottom: 12}}>A template is a JSON file describing which columns appear in the output and how they're labeled. Binding a column to Unit 1 (UNIT_QY1) or Unit 2 (UNIT_QY2) gives its label cell a dropdown of mass units and orders of magnitude. Binding to a Value column (ValMo/ValYr) gives its label cell a dropdown for Actual/Thousands/Millions, set independently per column.</p>
+      <div className="row" style={{marginBottom: 12}}>
+        <div className="field">
+          <span className="field-label">Active Template</span>
+          <select value={active.id} onChange={e => setActiveId(e.target.value)}>
+            {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </select>
+        </div>
+        <button className="btn secondary" onClick={newTemplate}>＋ New template</button>
+        <button className="btn secondary" onClick={exportJson}>⬇ Export JSON</button>
+        <label className="btn secondary" style={{display:"inline-flex",alignItems:"center",cursor:"pointer"}}>
+          ⬆ Import JSON
+          <input type="file" accept="application/json" onChange={importJson} style={{display:"none"}} />
+        </label>
+        {templates.length > 1 && <button className="btn danger" onClick={() => deleteTemplate(active.id)}>Delete template</button>}
+      </div>
+      <div className="section-title" style={{marginTop: 8}}>Columns — click a cell to configure it</div>
+      <p className="hint" style={{marginBottom: 10}}>Top cell picks which field the column is bound to; the cell below sets the label the person sees. Both lock in once set — click again to reopen. The results table beneath this panel is the live preview of exactly this configuration.</p>
+      <div style={{display:"flex", overflowX:"auto", border:"2px solid var(--surface-border)", borderRadius:8}}>
+        {active.columns.map((c, i) => {
+          const fieldOpen = editingCell && editingCell.index === i && editingCell.part === "field";
+          const labelOpen = editingCell && editingCell.index === i && editingCell.part === "label";
+          return (
+            <div key={i} style={{display:"flex", flexDirection:"column", minWidth:150, borderRight:"1px solid var(--surface-border)", flexShrink:0}}>
+              <div style={{display:"flex", justifyContent:"flex-end", padding:"2px 4px", background:"var(--surface)", borderBottom:"1px solid var(--divider)"}}>
+                <button onClick={() => removeColumn(i)} title="Remove column" style={{background:"none",border:"none",color:"var(--danger)",cursor:"pointer",fontSize:"0.72rem",fontWeight:700}}>×</button>
+              </div>
+              <div onClick={() => setEditingCell({index:i, part:"field"})}
+                   style={{padding:"10px", borderBottom:"1px solid var(--divider)", background: c.key ? "rgba(0,94,162,.08)" : "rgba(250,225,50,.3)", cursor:"pointer", fontSize:"0.82rem", fontWeight:700, color:"var(--text-bright)", minHeight:20}}>
+                {fieldOpen ? (
+                  <select autoFocus value={c.key} onChange={e => chooseField(i, e.target.value)} onBlur={() => setEditingCell(null)} style={{width:"100%", height:32}}>
+                    <option value="">Choose field…</option>
+                    {AVAILABLE_FIELDS.map(f => <option key={f.key} value={f.key}>{f.key}</option>)}
+                  </select>
+                ) : (c.key || "Click to choose field…")}
+              </div>
+              <div onClick={() => setEditingCell({index:i, part:"label"})}
+                   style={{padding:"10px", cursor:"pointer", fontSize:"0.82rem", color:"var(--text)", minHeight:20}}>
+                {labelOpen ? (
+                  (c.key === "UNIT_QY1" || c.key === "UNIT_QY2") ? (
+                    <select autoFocus value={c.unitCode || "native"} onChange={e => setUnitCode(i, e.target.value)} onBlur={() => setEditingCell(null)} style={{width:"100%", height:32}}>
+                      {Object.entries(QUANTITY_UNIT_DEFS).map(([code, def]) => <option key={code} value={code}>{def.label}</option>)}
+                    </select>
+                  ) : (c.key === "ValMo" || c.key === "ValYr") ? (
+                    <select autoFocus value={c.magnitudeCode || "actual"} onChange={e => setMagnitudeCode(i, e.target.value)} onBlur={() => setEditingCell(null)} style={{width:"100%", height:32}}>
+                      {Object.entries(VALUE_MAGNITUDE_DEFS).map(([code, def]) => <option key={code} value={code}>{def.label}</option>)}
+                    </select>
+                  ) : (
+                    <input autoFocus type="text" defaultValue={c.label}
+                           onBlur={e => setLabel(i, e.target.value)}
+                           onKeyDown={e => { if (e.key === "Enter") e.target.blur(); }}
+                           style={{width:"100%", height:32}} />
+                  )
+                ) : (c.label || "Click to set label…")}
+              </div>
+            </div>
+          );
+        })}
+        <div style={{display:"flex", alignItems:"center", justifyContent:"center", minWidth:60, flexShrink:0}}>
+          <button className="btn secondary" onClick={addColumn}>＋</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ResultsView({ rows, template }) {
+  if (!rows.length) return <div className="panel"><div className="empty">No data yet. Run a fetch above.</div></div>;
+  const descCtx = computeDescriptorContext(template.columns);
+  function exportCsv() {
+    const forExport = rows.map(r => {
+      const out = {};
+      template.columns.forEach(c => {
+        const v = getCellValue(r, c, descCtx);
+        out[exportHeaderFor(c)] = typeof v === "number" ? fmtNum(v) : v;
+      });
+      return out;
+    });
+    const csv = Papa.unparse(forExport, { columns: template.columns.map(exportHeaderFor) });
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "census_pipeline_output.csv"; a.click();
+    URL.revokeObjectURL(url);
+  }
+  return (
+    <div className="panel">
+      <div className="row" style={{justifyContent:"space-between", marginBottom: 10}}>
+        <div className="hint">{rows.length.toLocaleString()} row{rows.length === 1 ? "" : "s"}</div>
+        <button className="btn green" onClick={exportCsv}>⬇ Download CSV</button>
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead><tr>{template.columns.map(c => <th key={c.key}>{exportHeaderFor(c)}</th>)}</tr></thead>
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={i} className={(r._subtotal ? "subtotal " : "") + (r._countryLast ? "country-last" : "")}>
+                {template.columns.map(c => {
+                  const v = getCellValue(r, c, descCtx);
+                  const isNum = typeof v === "number";
+                  return <td key={c.key} className={isNum ? "num" : ""}>{isNum ? fmtNum(v) : (v || "")}</td>;
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   ROOT APP
+   ========================================================================== */
+const SESSION_DEFAULTS = {
+  flow: "exports", granularity: "monthly", commodityCodesText: "7901110000, 7901120000", countryCodesText: "", districtCodesText: "",
+  startYear: 2023, startMonth: 1, endYear: 2024, endMonth: 12,
+  apiKey: "edd479ea905cd35e2ff6aabd6886f95972ac8955",
+  includedCategoryIds: [], activeTemplateId: null
+};
+
+// One-time migration: if categories exist with no groups yet, auto-create a
+// "Table 11" group and file every existing category into it.
+function migrateCategoriesToGroups(cats, grps) {
+  if (!cats.length) return { cats, grps };
+  if (grps.length) return { cats, grps };                 // already have groups
+  if (cats.some(c => c.groupId)) return { cats, grps };   // already assigned
+  const g = { id: makeId("grp"), name: "Table 11", commodity: "Zinc", publication: "MYB", table: "Table 11" };
+  const migratedCats = cats.map(c => ({ ...c, groupId: g.id }));
+  saveLS(LS_KEYS.groups, [g]);
+  saveLS(LS_KEYS.categories, migratedCats);
+  return { cats: migratedCats, grps: [g] };
+}
+
+function App() {
+  const initialSession = { ...SESSION_DEFAULTS, ...loadLS(LS_KEYS.session, {}) };
+  const initialTemplates = loadLS(LS_KEYS.templates, DEFAULT_TEMPLATES);
+  const migrated = migrateCategoriesToGroups(loadLS(LS_KEYS.categories, []), loadLS(LS_KEYS.groups, []));
+
+  const [flow, setFlow] = useState(initialSession.flow);
+  const [granularity, setGranularity] = useState(initialSession.granularity);
+  const [commodityCodesText, setCommodityCodesText] = useState(initialSession.commodityCodesText);
+  const [countryCodesText, setCountryCodesText] = useState(initialSession.countryCodesText);
+  const [districtCodesText, setDistrictCodesText] = useState(initialSession.districtCodesText);
+  const [startYear, setStartYear] = useState(initialSession.startYear);
+  const [startMonth, setStartMonth] = useState(initialSession.startMonth);
+  const [endYear, setEndYear] = useState(initialSession.endYear);
+  const [endMonth, setEndMonth] = useState(initialSession.endMonth);
+  const [apiKey, setApiKey] = useState(initialSession.apiKey);
+  const [categories, setCategories] = useState(() => migrated.cats);
+  const [groups, setGroups] = useState(() => migrated.grps);
+  const [includedIds, setIncludedIds] = useState(() => new Set(initialSession.includedCategoryIds));
+  const [rawRows, setRawRows] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const fieldCacheRef = React.useRef({});
+
+  const [templates, setTemplates] = useState(() => initialTemplates);
+  const [activeTemplateId, setActiveTemplateId] = useState(() => initialSession.activeTemplateId || (initialTemplates[0] || DEFAULT_TEMPLATES[0]).id);
+  const activeTemplate = templates.find(t => t.id === activeTemplateId) || templates[0];
+
+  const activeCategories = useMemo(() => categories.filter(c => includedIds.has(c.id)), [categories, includedIds]);
+
+  useEffect(() => {
+    saveLS(LS_KEYS.session, {
+      flow, granularity, commodityCodesText, countryCodesText, districtCodesText,
+      startYear, startMonth, endYear, endMonth, apiKey,
+      includedCategoryIds: Array.from(includedIds), activeTemplateId
+    });
+  }, [flow, granularity, commodityCodesText, countryCodesText, districtCodesText, startYear, startMonth, endYear, endMonth, apiKey, includedIds, activeTemplateId]);
+
+  const processedRows = useMemo(() => processRows(rawRows, activeCategories), [rawRows, activeCategories]);
+
+  const runFetch = useCallback(async () => {
+    setBusy(true); setError(null);
+    try {
+      const fields = await resolveFields(flow, "hs", fieldCacheRef.current);
+      const manualCodes = parseCodeList(commodityCodesText).map(c => `${c.code}${c.wildcard ? "*" : ""}`);
+      const catCodes = activeCategories.flatMap(c => c.codes.map(x => `${x.code}${x.wildcard ? "*" : ""}`));
+      const codes = Array.from(new Set([...manualCodes, ...catCodes]));
+      const countryCodes = parseCodeList(countryCodesText).map(c => c.code);
+      const districtCodes = parseCodeList(districtCodesText).map(c => c.code);
+      const templateKeys = new Set((activeTemplate.columns || []).map(c => c.key));
+      const extraFields = [];
+      if (templateKeys.has("QTY_1_MO") || templateKeys.has("QTY_1_YR") || templateKeys.has("UNIT_QY1")) extraFields.push("QTY_1_MO", "QTY_1_YR", "UNIT_QY1");
+      if (templateKeys.has("QTY_2_MO") || templateKeys.has("QTY_2_YR") || templateKeys.has("UNIT_QY2")) extraFields.push("QTY_2_MO", "QTY_2_YR", "UNIT_QY2");
+      const effStartMonth = granularity === "annual" ? 1 : startMonth;
+      const effEndMonth = granularity === "annual" ? 12 : endMonth;
+      const rows = await fetchTradeRange(flow, "hs", fields, codes, countryCodes, districtCodes, extraFields, startYear, effStartMonth, endYear, effEndMonth, apiKey.trim(), granularity);
+      rows.sort((a, b) =>
+        String(a.Year).localeCompare(String(b.Year)) ||
+        (a.Country || "").localeCompare(b.Country || "") ||
+        (a.Description || "").localeCompare(b.Description || "") ||
+        String(a.Code).localeCompare(String(b.Code)));
+      setRawRows(rows);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setBusy(false);
+    }
+  }, [flow, granularity, commodityCodesText, countryCodesText, districtCodesText, startYear, startMonth, endYear, endMonth, apiKey, activeCategories, activeTemplate]);
+
+  return (
+    <div className="app">
+      <h1>🌐 Census Trade Data Pipeline</h1>
+      <p className="subtitle">Acquisition → Processing → Presentation</p>
+
+      <div className="layer-banner"><span className="num">1</span><span className="title">Data Acquisition</span><span className="desc">— query the Census Bureau API</span></div>
+      <div className="panel">
+        <div className="row">
+          <div className="field">
+            <span className="field-label">Trade Flow</span>
+            <div className="radio-row">
+              <label className="radio-label"><input type="radio" checked={flow==="exports"} onChange={() => setFlow("exports")} /> Export</label>
+              <label className="radio-label"><input type="radio" checked={flow==="imports"} onChange={() => setFlow("imports")} /> Import</label>
+            </div>
+          </div>
+          <div className="field">
+            <span className="field-label">Data Granularity</span>
+            <div className="radio-row">
+              <label className="radio-label"><input type="radio" checked={granularity==="monthly"} onChange={() => setGranularity("monthly")} /> Monthly</label>
+              <label className="radio-label"><input type="radio" checked={granularity==="annual"} onChange={() => setGranularity("annual")} /> Annual</label>
+            </div>
+          </div>
+          <div className="field"><span className="field-label">Start Year</span><input type="number" value={startYear} onChange={e => setStartYear(parseInt(e.target.value||"0",10))} style={{width:90}} /></div>
+          {granularity === "monthly" && <div className="field"><span className="field-label">Start Month</span><input type="number" min="1" max="12" value={startMonth} onChange={e => setStartMonth(parseInt(e.target.value||"1",10))} style={{width:80}} /></div>}
+          <div className="field"><span className="field-label">End Year</span><input type="number" value={endYear} onChange={e => setEndYear(parseInt(e.target.value||"0",10))} style={{width:90}} /></div>
+          {granularity === "monthly" && <div className="field"><span className="field-label">End Month</span><input type="number" min="1" max="12" value={endMonth} onChange={e => setEndMonth(parseInt(e.target.value||"1",10))} style={{width:80}} /></div>}
+          <div className="field" style={{flex:"1 1 220px"}}>
+            <span className="field-label">API Key</span>
+            <input type="text" value={apiKey} onChange={e => setApiKey(e.target.value)} />
+          </div>
+        </div>
+        <div className="row" style={{marginTop: 14}}>
+          <div className="field" style={{flex:"1 1 260px"}}>
+            <span className="field-label">Commodity Code(s) — comma-separated, trailing * = wildcard</span>
+            <input type="text" value={commodityCodesText} onChange={e => setCommodityCodesText(e.target.value)} />
+          </div>
+          <div className="field" style={{flex:"1 1 180px"}}>
+            <span className="field-label">Country Code(s) — blank = all</span>
+            <input type="text" value={countryCodesText} onChange={e => setCountryCodesText(e.target.value)} placeholder="e.g. 1220, 2010" />
+          </div>
+          <div className="field" style={{flex:"1 1 180px"}}>
+            <span className="field-label">District Code(s) — blank = all</span>
+            <input type="text" value={districtCodesText} onChange={e => setDistrictCodesText(e.target.value)} />
+          </div>
+        </div>
+        <p className="hint" style={{marginTop: 6}}>Annual mode fetches only the last available month of each year (Census's Value/Quantity (Year) fields are already a running cumulative total, so that single month's Year figure is the full annual number) — fewer requests than Monthly, and the Month column is left blank on the resulting rows. This whole form is remembered automatically and restored on reload — no save step needed.</p>
+      </div>
+
+      <CategoryManager categories={categories} setCategories={setCategories} groups={groups} setGroups={setGroups} includedIds={includedIds} setIncludedIds={setIncludedIds} formCodesText={commodityCodesText} />
+
+      <div className="layer-banner"><span className="num">2</span><span className="title">Data Processing</span><span className="desc">— category subtotals (instant, no re-fetch)</span></div>
+      <div className="panel">
+        <p className="hint" style={{margin:0}}>Runs automatically off the "Aggregate" checkbox on each category above — nothing to set here directly. A multi-code category with Aggregate on keeps every per-code detail row and adds a "[Category] total" subtotal row. Unit conversion and value magnitude are configured per column in the Presentation grid below.</p>
+      </div>
+
+      <div className="panel">
+        <div className="row" style={{justifyContent:"space-between"}}>
+          <p className="hint" style={{margin:0}}>Fields, categories, and the active template above are all in place — this pulls data from the Census API using them.</p>
+          <button className="btn" disabled={busy} onClick={runFetch}>{busy ? "Fetching…" : "🔎 Fetch"}</button>
+        </div>
+        {error && <div className="error">{error}</div>}
+      </div>
+
+      <div className="layer-banner"><span className="num">3</span><span className="title">Data Presentation</span><span className="desc">— JSON templates render the processed rows</span></div>
+      <TemplateManager templates={templates} setTemplates={setTemplates} activeId={activeTemplateId} setActiveId={setActiveTemplateId} />
+      <ResultsView rows={processedRows} template={activeTemplate} />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
